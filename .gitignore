@@ -1,0 +1,3 @@
+/gallery_server/target/
+**/*.log
+*.exe
