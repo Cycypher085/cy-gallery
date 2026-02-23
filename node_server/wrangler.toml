@@ -10,3 +10,6 @@ bucket_name = "gallery"
 # Environment variables
 [vars]
 R2_PUBLIC_DOMAIN = "photos.cycypher.org"
+R2_BUCKET_NAME = "gallery"
+CLOUDFLARE_ACCOUNT_ID = "154279dfe629beb5bb3ca8475c03049d"
+# UPLOAD_PASSCODE, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY should be set via `wrangler secret put` in production

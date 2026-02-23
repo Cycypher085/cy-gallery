@@ -81,7 +81,7 @@
             <p class="text-slate-500 dark:text-slate-400 max-w-2xl">Share your perspective of the world. High-quality
                 images with detailed metadata help our community discover your unique journey.</p>
         </header>
-        <form class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <form id="upload-form" class="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div class="lg:col-span-7 space-y-6">
                 <div class="relative group">
                     <label class="block w-full cursor-pointer">
@@ -103,8 +103,9 @@
                                 <span>Min 2000px</span>
                             </div>
                         </div>
-                        <input accept="image/*" class="hidden" type="file" />
+                        <input accept="image/*" class="hidden" type="file" id="file-input" required />
                     </label>
+                    <p id="file-name-display" class="mt-2 text-sm text-accent font-medium text-center hidden"></p>
                 </div>
                 <div
                     class="bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-6 border border-slate-100 dark:border-zinc-800">
@@ -133,14 +134,22 @@
                             for="title">Photo Title</label>
                         <input
                             class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:ring-0 transition-all"
-                            id="title" placeholder="Give your work a name" type="text" />
+                            id="title" placeholder="Give your work a name" type="text" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400"
+                            for="passcode">Upload Passcode <span class="text-red-500">*</span></label>
+                        <input
+                            class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:ring-0 transition-all font-mono"
+                            id="passcode" placeholder="Enter authorization code" type="password" required
+                            autocomplete="off" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400"
                             for="description">Description</label>
                         <textarea
                             class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:ring-0 transition-all resize-none"
-                            id="description" placeholder="Tell the story behind this shot..." rows="4"></textarea>
+                            id="description" placeholder="Tell the story behind this shot..." rows="3"></textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400"
@@ -180,12 +189,16 @@
                         type="button">
                         Cancel
                     </button>
-                    <button
-                        class="flex-1 bg-primary dark:bg-white text-white dark:text-primary font-bold py-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                    <button id="submit-btn"
+                        class="flex-1 bg-primary dark:bg-white text-white dark:text-primary font-bold py-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         type="submit">
-                        <span>Publish Photo</span>
-                        <span class="material-symbols-outlined text-xl">send</span>
+                        <span id="submit-text">Publish Photo</span>
+                        <span id="submit-icon" class="material-symbols-outlined text-xl">send</span>
                     </button>
+                    <p id="error-message" class="w-full text-red-500 text-sm mt-2 hidden col-span-2">Error message goes
+                        here</p>
+                    <p id="success-message" class="w-full text-green-500 text-sm mt-2 hidden col-span-2">Photo uploaded
+                        successfully!</p>
                 </div>
                 <p class="text-[11px] text-slate-400 leading-relaxed">
                     By clicking publish, you agree to our Terms of Service and Privacy Policy. Your photo will be
@@ -194,17 +207,109 @@
             </div>
         </form>
     </main>
-    <footer class="mt-12 py-12 border-t border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/20">
-        <div class="max-w-6xl mx-auto px-6 text-center">
-            <div class="flex items-center justify-center gap-2 mb-6 grayscale opacity-50">
-                <span class="material-symbols-outlined text-2xl">explore</span>
-                <span class="font-display tracking-tight font-bold">GLOBAL LENS</span>
-            </div>
-            <p class="text-xs text-slate-400">© 2024 Global Lens Photography. All rights reserved. Exploring the world
-                one frame at a time.</p>
-        </div>
     </footer>
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const uploadForm = document.getElementById('upload-form');
+        const passcodeInp = document.getElementById('passcode');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitText = document.getElementById('submit-text');
+        const submitIcon = document.getElementById('submit-icon');
+        const errorMsg = document.getElementById('error-message');
+        const successMsg = document.getElementById('success-message');
 
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisplay.textContent = 'Selected: ' + e.target.files[0].name;
+                fileNameDisplay.classList.remove('hidden');
+                errorMsg.classList.add('hidden');
+                successMsg.classList.add('hidden');
+            }
+        });
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.classList.add('hidden');
+            successMsg.classList.add('hidden');
+
+            const file = fileInput.files[0];
+            const passcode = passcodeInp.value;
+
+            if (!file) {
+                showError('Please select a photo to upload.');
+                return;
+            }
+
+            if (!passcode) {
+                showError('Passcode is required.');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                // 1. Get Presigned URL
+                const presignedRes = await fetch('/api/upload-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: file.name,
+                        contentType: file.type,
+                        passcode: passcode
+                    })
+                });
+
+                if (!presignedRes.ok) {
+                    const errorData = await presignedRes.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Failed to authorize upload. Check your passcode.');
+                }
+
+                const { url, key } = await presignedRes.json();
+
+                // 2. Upload file directly to R2 using PUT
+                const uploadRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': file.type
+                    },
+                    body: file
+                });
+
+                if (!uploadRes.ok) {
+                    throw new Error('Failed to upload file to storage bucket.');
+                }
+
+                // Success
+                successMsg.classList.remove('hidden');
+                uploadForm.reset();
+                fileNameDisplay.classList.add('hidden');
+                fileNameDisplay.textContent = '';
+
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.classList.remove('hidden');
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                submitBtn.disabled = true;
+                submitText.textContent = 'Uploading...';
+                submitIcon.textContent = 'hourglass_empty';
+            } else {
+                submitBtn.disabled = false;
+                submitText.textContent = 'Publish Photo';
+                submitIcon.textContent = 'send';
+            }
+        }
+    </script>
 </body>
 
 </html>
