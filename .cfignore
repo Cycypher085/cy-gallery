@@ -1,0 +1,3 @@
+node_server/node_modules/
+node_server/npm-debug.log
+.git/
