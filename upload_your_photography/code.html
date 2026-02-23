@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Upload Your Photography | Global Lens</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <title>上传：分享你的视觉故事 | GLOBAL LENS</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Montserrat:wght@600;700&amp;display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Noto+Sans+SC:wght@300;400;500;700&amp;family=Montserrat:wght@600;700&amp;display=swap"
         rel="stylesheet" />
     <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
     <script>
         tailwind.config = {
@@ -18,195 +18,210 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#1a1a1a",
-                        accent: "#6366f1",
-                        "background-light": "#fcfcfc",
-                        "background-dark": "#0a0a0a",
+                        primary: "#ffffff",
+                        accent: "#818cf8",
                     },
                     fontFamily: {
-                        display: ["Montserrat", "sans-serif"],
-                        sans: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.5rem",
+                        display: ["Montserrat", "Noto Sans SC", "sans-serif"],
+                        sans: ["Inter", "Noto Sans SC", "sans-serif"],
                     },
                 },
             },
         };
     </script>
-    <style>
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply antialiased text-white;
+                background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2070');
+                background-attachment: fixed;
+                background-size: cover;
+                background-position: center;
+            }
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+        }
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none !important;
-            box-shadow: none !important;
-            border-color: #6366f1 !important;
         }
     </style>
 </head>
 
-<body
-    class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 transition-colors duration-300 font-sans">
+<body class="min-h-screen">
     <nav
-        class="border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md z-50">
-        <a href="/" class="flex items-center gap-2">
+        class="px-8 py-5 flex items-center justify-between sticky top-0 bg-black/20 backdrop-blur-xl z-50 border-b border-white/10">
+        <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-accent text-3xl">explore</span>
-            <span class="font-display text-xl tracking-tight font-bold dark:text-white">GLOBAL LENS</span>
-        </a>
-        <div class="hidden md:flex items-center gap-8 font-medium text-sm">
-            <a class="hover:text-accent transition-colors" href="/discovery">EXPLORE</a>
-            <a class="hover:text-accent transition-colors" href="#">GALLERIES</a>
-            <a class="hover:text-accent transition-colors" href="/upload">COMMUNITY</a>
+            <span class="font-display text-xl tracking-widest font-bold">GLOBAL LENS</span>
         </div>
-        <div class="flex items-center gap-4">
-            <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                onclick="document.documentElement.classList.toggle('dark')">
-                <span class="material-symbols-outlined dark:hidden">dark_mode</span>
-                <span class="material-symbols-outlined hidden dark:inline">light_mode</span>
+        <div class="hidden md:flex items-center gap-10 font-medium text-xs tracking-[0.2em]">
+            <a class="hover:text-accent transition-colors" href="#">探索</a>
+            <a class="hover:text-accent transition-colors" href="#">画廊</a>
+            <a class="hover:text-accent transition-colors" href="#">社区</a>
+        </div>
+        <div class="flex items-center gap-5">
+            <button class="p-2 rounded-full hover:bg-white/10 transition-colors">
+                <span class="material-symbols-outlined">notifications</span>
             </button>
-            <div
-                class="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden ring-1 ring-slate-300 dark:ring-slate-700">
-                <img alt="User avatar"
+            <div class="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/20">
+                <img alt="用户头像" class="object-cover h-full w-full"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaO6BYsdVtEtu5FnPToo0HStwkWd7kh2Tb16T683wuDZ1ASczHYV1Q-Nxl0Gy9dFee1NKhpyYp83kMj1mH17tY79PVHRY53XX-TdC7EaLdAwSkcIFXwHUd5MyQt8bnerSQSyBRJHnZH_0lHGwyZu3JGupKAwZLJ2oMQPD8O4MhIBDrO-jBPPMeCK8xyQZEJE7DNkVdIhRwDFfPxIhagYWoJ2rTKzxc6MH88_WuYqX9wi789c6IP5SaHCFjd5LvB18dJDKaZ8wX4FM" />
             </div>
         </div>
     </nav>
-    <main class="max-w-6xl mx-auto px-6 py-12">
-        <header class="mb-12">
-            <h1 class="font-display text-4xl font-bold mb-2 tracking-tight dark:text-white">Upload Your Photography</h1>
-            <p class="text-slate-500 dark:text-slate-400 max-w-2xl">Share your perspective of the world. High-quality
-                images with detailed metadata help our community discover your unique journey.</p>
+    <main class="max-w-6xl mx-auto px-6 py-16">
+        <header class="mb-12 text-center md:text-left">
+            <h1 class="font-display text-4xl md:text-5xl font-bold mb-4 tracking-tight">上传：分享你的视觉故事</h1>
+            <p class="text-white/70 max-w-2xl text-lg font-light leading-relaxed">
+                向世界展示你的独特视角。高分辨率图像与详细的元数据将帮助社区发现你的不凡旅程。
+            </p>
         </header>
-        <form id="upload-form" class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <div class="lg:col-span-7 space-y-6">
-                <div class="relative group">
-                    <label class="block w-full cursor-pointer">
-                        <div
-                            class="aspect-[4/3] w-full border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl flex flex-col items-center justify-center gap-4 bg-white dark:bg-zinc-900 transition-all group-hover:border-accent group-hover:bg-accent/5">
+        <div class="glass-panel rounded-3xl p-8 md:p-12">
+            <form id="upload-form" class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <div class="lg:col-span-7 space-y-8">
+                    <div class="relative group">
+                        <label class="block w-full cursor-pointer">
                             <div
-                                class="w-16 h-16 rounded-full bg-slate-50 dark:bg-zinc-800 flex items-center justify-center text-slate-400 group-hover:text-accent transition-colors">
-                                <span class="material-symbols-outlined text-4xl">cloud_upload</span>
+                                class="aspect-[4/3] w-full border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center justify-center gap-6 bg-white/5 transition-all group-hover:border-white/40 group-hover:bg-white/10">
+                                <div
+                                    class="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white/60 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined text-5xl">cloud_upload</span>
+                                </div>
+                                <div class="text-center">
+                                    <p class="font-medium text-xl">将照片拖放到此处</p>
+                                    <p class="text-white/50 text-sm mt-2">或 点击此处从设备选择</p>
+                                </div>
+                                <div
+                                    class="mt-2 flex gap-6 text-[11px] font-medium text-white/40 uppercase tracking-widest">
+                                    <span>JPG, PNG, TIFF</span>
+                                    <span>•</span>
+                                    <span>最大 25MB</span>
+                                    <span>•</span>
+                                    <span>最少 2000px</span>
+                                </div>
                             </div>
-                            <div class="text-center">
-                                <p class="font-medium text-lg dark:text-white">Drag and drop your photo here</p>
-                                <p class="text-slate-400 text-sm mt-1">Or click to browse from your device</p>
-                            </div>
-                            <div class="mt-4 flex gap-4 text-xs font-medium text-slate-400">
-                                <span>JPG, PNG, TIFF</span>
-                                <span>•</span>
-                                <span>Max 25MB</span>
-                                <span>•</span>
-                                <span>Min 2000px</span>
-                            </div>
+                            <input accept="image/*" class="hidden" type="file" id="file-input" required />
+                        </label>
+                        <p id="file-name-display" class="mt-3 text-sm text-accent font-medium text-center hidden"></p>
+                    </div>
+                    <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+                        <h3 class="text-xs font-bold mb-5 uppercase tracking-[0.2em] text-accent">摄影作品发布指南</h3>
+                        <ul class="space-y-4 text-sm text-white/80">
+                            <li class="flex items-start gap-4">
+                                <span class="material-symbols-outlined text-emerald-400 text-xl">check_circle</span>
+                                <span>仅限高分辨率图像（长边至少 2000 像素）。</span>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <span class="material-symbols-outlined text-emerald-400 text-xl">check_circle</span>
+                                <span>必须为原创作品。请确保您拥有完整的版权。</span>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <span class="material-symbols-outlined text-amber-400 text-xl">info</span>
+                                <span>请避免添加过于显眼的水印或文字遮盖。</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 space-y-8">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-3 text-white/70" for="title">作品标题</label>
+                            <input class="glass-input w-full px-5 py-4 rounded-xl text-white placeholder-white/30"
+                                id="title" placeholder="为你的作品命名" type="text" required />
                         </div>
-                        <input accept="image/*" class="hidden" type="file" id="file-input" required />
-                    </label>
-                    <p id="file-name-display" class="mt-2 text-sm text-accent font-medium text-center hidden"></p>
-                </div>
-                <div
-                    class="bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-6 border border-slate-100 dark:border-zinc-800">
-                    <h3 class="text-sm font-semibold mb-3 uppercase tracking-wider text-slate-400">Photography
-                        Guidelines</h3>
-                    <ul class="space-y-3 text-sm">
-                        <li class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-emerald-500 text-sm mt-0.5">check_circle</span>
-                            <span>High-resolution images only (minimum 2000px on long edge).</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-emerald-500 text-sm mt-0.5">check_circle</span>
-                            <span>Original work only. Ensure you hold all copyrights.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-amber-500 text-sm mt-0.5">info</span>
-                            <span>Avoid heavy watermarks or text overlays.</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="lg:col-span-5 space-y-8">
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400"
-                            for="title">Photo Title</label>
-                        <input
-                            class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:ring-0 transition-all"
-                            id="title" placeholder="Give your work a name" type="text" required />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400"
-                            for="passcode">Upload Passcode <span class="text-red-500">*</span></label>
-                        <input
-                            class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:ring-0 transition-all font-mono"
-                            id="passcode" placeholder="Enter authorization code" type="password" required
-                            autocomplete="off" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400"
-                            for="description">Description</label>
-                        <textarea
-                            class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:ring-0 transition-all resize-none"
-                            id="description" placeholder="Tell the story behind this shot..." rows="3"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400"
-                            for="category">Category</label>
-                        <select
-                            class="w-full px-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:ring-0 transition-all appearance-none cursor-pointer"
-                            id="category">
-                            <option value="">Select a category</option>
-                            <option value="landscape">Landscape &amp; Nature</option>
-                            <option value="urban">Urban &amp; Street</option>
-                            <option value="portrait">Portrait</option>
-                            <option value="architecture">Architecture</option>
-                            <option value="wildlife">Wildlife</option>
-                            <option value="astrophotography">Astrophotography</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-slate-600 dark:text-slate-400"
-                            for="location">Location Data</label>
-                        <div class="relative">
-                            <span
-                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">location_on</span>
+                        <div>
+                            <label class="block text-sm font-medium mb-3 text-white/70" for="passcode">上传口令 <span
+                                    class="text-red-400">*</span></label>
                             <input
-                                class="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:ring-0 transition-all"
-                                id="location" placeholder="Where was this taken?" type="text" />
+                                class="glass-input w-full px-5 py-4 rounded-xl text-white placeholder-white/30 font-mono"
+                                id="passcode" placeholder="输入授权码" type="password" required autocomplete="off" />
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
-                            We'll try to extract GPS data automatically if available.
-                        </p>
+                        <div>
+                            <label class="block text-sm font-medium mb-3 text-white/70" for="description">作品描述</label>
+                            <textarea
+                                class="glass-input w-full px-5 py-4 rounded-xl text-white placeholder-white/30 resize-none"
+                                id="description" placeholder="分享这张照片背后的故事..." rows="4"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-3 text-white/70" for="category">分类</label>
+                            <select
+                                class="glass-input w-full px-5 py-4 rounded-xl text-white appearance-none cursor-pointer"
+                                id="category">
+                                <option class="bg-zinc-900" value="">请选择一个分类</option>
+                                <option class="bg-zinc-900" value="landscape">自然风光</option>
+                                <option class="bg-zinc-900" value="urban">城市街头</option>
+                                <option class="bg-zinc-900" value="portrait">人像摄影</option>
+                                <option class="bg-zinc-900" value="architecture">建筑美学</option>
+                                <option class="bg-zinc-900" value="wildlife">野生动物</option>
+                                <option class="bg-zinc-900" value="astrophotography">天文摄影</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-3 text-white/70" for="location">拍摄地点</label>
+                            <div class="relative">
+                                <span
+                                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40">location_on</span>
+                                <input
+                                    class="glass-input w-full pl-12 pr-5 py-4 rounded-xl text-white placeholder-white/30"
+                                    id="location" placeholder="这张照片在哪里拍摄的？" type="text" />
+                            </div>
+                            <p class="text-[11px] text-white/40 mt-3 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px]">auto_fix_high</span>
+                                我们将尝试自动提取可用的 GPS 经纬度数据。
+                            </p>
+                        </div>
                     </div>
+                    <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center gap-4">
+                        <button
+                            class="w-full sm:w-auto px-8 py-4 font-medium text-white/60 hover:text-white transition-colors"
+                            type="button">
+                            取消
+                        </button>
+                        <button id="submit-btn"
+                            class="w-full flex-1 bg-white hover:bg-white/90 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-3 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                            type="submit">
+                            <span id="submit-text">发布作品</span>
+                            <span id="submit-icon" class="material-symbols-outlined text-xl">send</span>
+                        </button>
+                    </div>
+                    <p id="error-message" class="w-full text-red-400 text-sm mt-3 hidden text-center sm:text-left">错误信息
+                    </p>
+                    <p id="success-message"
+                        class="w-full text-emerald-400 text-sm mt-3 hidden text-center sm:text-left">照片上传成功！</p>
+                    <p class="text-[11px] text-white/30 leading-relaxed text-center sm:text-left mt-4">
+                        点击发布即表示您同意我们的服务条款和隐私政策。您的照片将根据我们的标准社区许可向公众开放。
+                    </p>
                 </div>
-                <div
-                    class="pt-6 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between gap-4">
-                    <button
-                        class="px-6 py-3 font-medium text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors"
-                        type="button">
-                        Cancel
-                    </button>
-                    <button id="submit-btn"
-                        class="flex-1 bg-primary dark:bg-white text-white dark:text-primary font-bold py-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        type="submit">
-                        <span id="submit-text">Publish Photo</span>
-                        <span id="submit-icon" class="material-symbols-outlined text-xl">send</span>
-                    </button>
-                    <p id="error-message" class="w-full text-red-500 text-sm mt-2 hidden col-span-2">Error message goes
-                        here</p>
-                    <p id="success-message" class="w-full text-green-500 text-sm mt-2 hidden col-span-2">Photo uploaded
-                        successfully!</p>
-                </div>
-                <p class="text-[11px] text-slate-400 leading-relaxed">
-                    By clicking publish, you agree to our Terms of Service and Privacy Policy. Your photo will be
-                    visible to the public under our standard community license.
-                </p>
-            </div>
-        </form>
+            </form>
+        </div>
     </main>
+    <footer class="mt-20 py-16 border-t border-white/10 bg-black/40 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <div class="flex items-center justify-center gap-3 mb-8 opacity-60">
+                <span class="material-symbols-outlined text-2xl">explore</span>
+                <span class="font-display tracking-widest font-bold">GLOBAL LENS</span>
+            </div>
+            <p class="text-xs text-white/40 tracking-widest">© 2024 GLOBAL LENS PHOTOGRAPHY. 版权所有。用每一帧探索世界。</p>
+        </div>
+    </footer>
+
     </footer>
     <script>
         const fileInput = document.getElementById('file-input');
@@ -221,7 +236,7 @@
 
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                fileNameDisplay.textContent = 'Selected: ' + e.target.files[0].name;
+                fileNameDisplay.textContent = '已选择: ' + e.target.files[0].name;
                 fileNameDisplay.classList.remove('hidden');
                 errorMsg.classList.add('hidden');
                 successMsg.classList.add('hidden');
@@ -237,12 +252,12 @@
             const passcode = passcodeInp.value;
 
             if (!file) {
-                showError('Please select a photo to upload.');
+                showError('请选择要上传的照片。');
                 return;
             }
 
             if (!passcode) {
-                showError('Passcode is required.');
+                showError('请输入上传口令。');
                 return;
             }
 
@@ -262,7 +277,7 @@
 
                 if (!presignedRes.ok) {
                     const errorData = await presignedRes.json().catch(() => ({}));
-                    throw new Error(errorData.error || 'Failed to authorize upload. Check your passcode.');
+                    throw new Error(errorData.error || '授权失败，请检查您的口令。');
                 }
 
                 const { url, key } = await presignedRes.json();
@@ -277,7 +292,7 @@
                 });
 
                 if (!uploadRes.ok) {
-                    throw new Error('Failed to upload file to storage bucket.');
+                    throw new Error('上传到存储桶失败。');
                 }
 
                 // Success
@@ -301,11 +316,11 @@
         function setLoading(isLoading) {
             if (isLoading) {
                 submitBtn.disabled = true;
-                submitText.textContent = 'Uploading...';
+                submitText.textContent = '上传中...';
                 submitIcon.textContent = 'hourglass_empty';
             } else {
                 submitBtn.disabled = false;
-                submitText.textContent = 'Publish Photo';
+                submitText.textContent = '发布作品';
                 submitIcon.textContent = 'send';
             }
         }
