@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "wrangler pages dev ../ --port 8788",
+    "deploy": "wrangler pages deploy ../"
   },
   "keywords": [],
   "author": "",
@@ -17,11 +19,13 @@
     "mime-types": "^3.0.2"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260302.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/mime-types": "^3.0.1",
     "@types/node": "^25.3.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.67.0"
   }
 }

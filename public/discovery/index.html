@@ -123,7 +123,7 @@
         </div>
     </header>
     <main class="max-w-7xl mx-auto px-6 pb-24">
-        <div class="masonry-grid" id="masonry-grid-container">
+        <div class="masonry-grid">
             <div class="masonry-item group relative cursor-zoom-in overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800"
                 onclick="toggleModal()">
                 <img alt="Mountain landscape at sunset"
@@ -394,57 +394,7 @@
             <p class="text-xs text-slate-400">© 2024 Lumina Collective. All rights reserved.</p>
         </div>
     </footer>
-    <script>
-        async function loadImages() {
-            try {
-                const response = await fetch('/api/images');
-                if (!response.ok) throw new Error('API failed');
-                const images = await response.json();
 
-                if (images && images.length > 0) {
-                    const masonryContainer = document.getElementById('masonry-grid-container');
-                    if (masonryContainer) {
-                        masonryContainer.innerHTML = '';
-                        images.forEach((img, index) => {
-                            const filename = img.key.split('/').pop() || 'Untitled';
-                            const item = document.createElement('div');
-                            item.className = 'masonry-item group relative cursor-zoom-in overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800';
-                            item.innerHTML = `
-                            <img alt="${filename}" class="w-full h-auto transition-transform duration-700 group-hover:scale-105" src="${img.url}" />
-                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
-                                <div class="flex justify-between items-center text-white">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center shadow-sm">
-                                            <span class="material-icons-outlined text-sm">person</span>
-                                        </div>
-                                        <span class="text-sm font-medium truncate w-24">${filename}</span>
-                                    </div>
-                                    <div class="flex items-center gap-3 text-lg">
-                                        <span class="material-icons-outlined">favorite_border</span>
-                                        <span class="material-icons-outlined">bookmark_border</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                            item.addEventListener('click', () => {
-                                const modalImg = document.querySelector('#photoModal img.max-h-full');
-                                if (modalImg) modalImg.src = img.url;
-
-                                const titleEl = document.querySelector('#photoModal h2.text-3xl');
-                                if (titleEl) titleEl.textContent = filename;
-
-                                toggleModal();
-                            });
-                            masonryContainer.appendChild(item);
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading images:', error);
-            }
-        }
-        document.addEventListener('DOMContentLoaded', loadImages);
-    </script>
 </body>
 
 </html>

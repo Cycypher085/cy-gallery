@@ -1,0 +1,45 @@
+# Full-Stack Implementation & Public Deployment Plan
+
+Our goal is to evolve the static HTML mockups into a fully functional dynamic gallery and deploy it globally via Cloudflare Pages using the `cycypher.org` domain.
+
+## Architectural Shift: Node.js to Serverless
+
+Because Cloudflare Pages is a static hosting platform augmented with Serverless Functions, we cannot run our `express` server ([src/server.ts](file:///d:/stitch/node_server/src/server.ts)). Instead, we will leverage **Cloudflare Pages Functions**.
+
+This approach offers significant advantages:
+1. **Zero Dev-Ops**: No need to provision or manage a Node.js VPS.
+2. **Native R2 Integration**: Cloudflare Functions can read from R2 buckets directly via internal bindings, completely bypassing the need for AWS SDKs and public API keys in production!
+3. **Global Edge Network**: APIs respond with single-digit millisecond latency worldwide.
+
+## Proposed Changes
+
+### Component 1: Serverless Backend API
+We will create a specific folder structure `functions/api/` that Cloudflare automatically converts into API endpoints.
+- Create `functions/api/images.ts`. This endpoint will use the native Cloudflare environment binding (`env.MY_BUCKET.list()`) to retrieve all uploaded image keys from R2 and return them as JSON.
+
+#### [NEW] d:\stitch\node_server\functions\api\images.ts
+#### [NEW] d:\stitch\node_server\wrangler.toml
+
+### Component 2: Dynamic Frontend Refactoring
+We need to replace the hardcoded "fake" images in the UI with dynamic data fetched from our new backend.
+
+#### [MODIFY] d:\stitch\gallery_home_with_interactive_map\code.html
+- Inject a `<script>` tag.
+- Fetch data from `/api/images`.
+- Clear the existing `div.grid` containers and dynamically generate `<img>` tags populated with the real R2 CDN URLs (e.g., `https://photos.cycypher.org/image.jpg`).
+
+#### [MODIFY] d:\stitch\photo_discovery_and_details\code.html
+- Apply the same fetch logic to populate the masonry grid structure dynamically.
+
+### Component 3: Build & Deployment Configuration
+We will configure Cloudflare's CLI tool (`wrangler`) to deploy our files. We need to restructure slightly so Wrangler knows which folder holds the "public" HTML vs the backend code.
+
+#### [MODIFY] d:\stitch\node_server\package.json
+
+## Verification Plan
+
+### Local Verification
+We will use Cloudflare's local simulator (`npx wrangler pages dev`) to test the backend functions and frontend integration seamlessly on `localhost:8788`.
+
+### Production Deployment
+Finally, we will run `npx wrangler pages deploy` to push the site live to the Cloudflare edge, at which point the user can bind their custom domain `cycypher.org` in the dashboard.

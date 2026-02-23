@@ -118,7 +118,7 @@
 <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                     Recent Uploads
                 </h3>
-<div class="space-y-4 max-h-[240px] overflow-y-auto custom-scrollbar pr-2" id="recent-uploads-container">
+<div class="space-y-4 max-h-[240px] overflow-y-auto custom-scrollbar pr-2">
 <div class="flex gap-3 group cursor-pointer">
 <img alt="Landscape photo" class="w-12 h-12 rounded-lg object-cover grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_Sa3JGiquaAkdhHRKk1W0HiYoTatMZAxqadWgYe_YBbKmEvb4E7E3HILdVi-raASzTL20MCdrYjXoKdxjtGKBBIATZynWg9HkbJsYoeZEXy0q54tajhOAxCQthMSOitLKvhN5N6r6QgmovPUfD6e0EYRDqa4tqXzvQxRvi7HKy2mzGty81Hdq7R0Z2SYpuPZ2lg5vdtQxnMVMv0WV_PCgi5irOxk5fSbMClz1ySTee1USoSdH45GggUwS4d4hQif9eGO59__dzws"/>
 <div>
@@ -152,7 +152,7 @@
 </div>
 <a class="text-sm font-bold tracking-widest uppercase border-b-2 border-primary pb-1 hover:opacity-70 transition-opacity" href="#">View All Series</a>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-[800px]" id="collections-container">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-[800px]">
 <div class="md:col-span-8 group relative overflow-hidden rounded-3xl">
 <img alt="Landscapes" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdaRyxB70eWi0lDxpqrTyrQ6DyO1oQc-RumwC57v0S9K8qHGELwgn8P9K9XymjKNyIebjuj7OBPrtAvOeFYweQ3mbNnOYM1jHipV4fYxb-vuQIBSuYfub0s09cTtYLs1G6mm_vHHGaDXr_gkbQy1MpnKs5SAubqqSbVR5K_ugixELSZfm7TjH-CZJhR5UqcngZAJtr0lnst8CUPrnGlNFRBIV8vf9HSHgnT6bbrCYcwQGJlzyBbwarzoR2rXVtekBbQ6Fh9NXcntQ"/>
 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
@@ -267,66 +267,5 @@
 </div>
 </div>
 </footer>
-<script>
-    async function loadImages() {
-        try {
-            const response = await fetch('/api/images');
-            if (!response.ok) throw new Error('API failed');
-            const images = await response.json();
-            
-            if (images && images.length > 0) {
-                // Populate Recent Uploads
-                const recentContainer = document.getElementById('recent-uploads-container');
-                if (recentContainer) {
-                    recentContainer.innerHTML = '';
-                    images.slice(0, 5).forEach(img => {
-                        const filename = img.key.split('/').pop() || 'Untitled';
-                        const item = document.createElement('div');
-                        item.className = 'flex gap-3 group cursor-pointer';
-                        item.innerHTML = `
-                            <img alt="Uploaded photo" class="w-12 h-12 rounded-lg object-cover grayscale group-hover:grayscale-0 transition-all" src="${img.url}"/>
-                            <div>
-                                <p class="text-sm font-medium group-hover:text-primary whitespace-nowrap overflow-hidden text-ellipsis w-[120px]">${filename}</p>
-                                <p class="text-xs text-slate-500">Global Gallery</p>
-                            </div>
-                        `;
-                        recentContainer.appendChild(item);
-                    });
-                }
-                
-                // Populate Collections
-                const collectionsContainer = document.getElementById('collections-container');
-                if (collectionsContainer) {
-                    collectionsContainer.innerHTML = '';
-                    const classes = [
-                        'md:col-span-8',
-                        'md:col-span-4',
-                        'md:col-span-4',
-                        'md:col-span-8'
-                    ];
-                    images.slice(0, 4).forEach((img, index) => {
-                        const colClass = classes[index % classes.length];
-                        const filename = img.key.split('/').pop() || 'Untitled';
-                        const item = document.createElement('div');
-                        item.className = `${colClass} group relative overflow-hidden rounded-3xl`;
-                        item.innerHTML = `
-                            <img alt="Collection ${filename}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="${img.url}"/>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                            <div class="absolute bottom-10 left-10">
-                                <h3 class="text-3xl lg:text-4xl font-display text-white font-bold mb-2">Collection ${index + 1}</h3>
-                                <p class="text-white/80 ${index % 3 === 0 ? 'mb-6' : ''}">${filename}</p>
-                                ${index % 3 === 0 ? `<button class="bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-slate-200 transition-colors">Explore</button>` : ''}
-                            </div>
-                        `;
-                        collectionsContainer.appendChild(item);
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error loading images:', error);
-        }
-    }
-    
-    document.addEventListener('DOMContentLoaded', loadImages);
-</script>
+
 </body></html>
