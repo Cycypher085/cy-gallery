@@ -1,16 +1,16 @@
 {
   "name": "cy-gallery",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A personal photo gallery with interactive map",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview"
   },
   "repository": {
     "type": "git",
+    "url": "https://github.com/Cycypher085/cy-gallery.git"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +19,6 @@
     "url": "https://github.com/Cycypher085/cy-gallery/issues"
   },
   "homepage": "https://github.com/Cycypher085/cy-gallery#readme",
-  "type": "module",
   "dependencies": {
     "@astrojs/check": "^0.9.8",
     "@astrojs/cloudflare": "^13.1.4",
