@@ -1,0 +1,123 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+
+const featuredPhotos = [
+  { id: 1, location: '云南·大理', lat: 25.6065, lng: 100.2679, title: '洱海晨曦', url: 'https://images.unsplash.com/photo-1528183429752-8e2a3f8f94b9?w=800' },
+  { id: 2, location: '西藏·拉萨', lat: 29.6520, lng: 91.1721, title: '布达拉宫', url: 'https://images.unsplash.com/photo-1589308454676-22b5bc7-0a97?w=800' },
+  { id: 3, location: '冰岛·雷克雅未克', lat: 64.1466, lng: -21.9426, title: '极光之夜', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=800' },
+  { id: 4, location: '日本·京都', lat: 35.0116, lng: 135.7681, title: '�的绿意', url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800' },
+  { id: 5, location: '挪威·特罗姆瑟', lat: 69.6496, lng: 18.9560, title: '极光探险', url: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=800' },
+  { id: 6, location: '新西兰·皇后镇', lat: -45.0312, lng: 168.6626, title: '湖光山色', url: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=800' },
+];
+---
+
+<Layout title="全球影像 | 交互式摄影地图">
+  <Navbar />
+  
+  <!-- Hero Section with Map Background -->
+  <section class="relative h-screen min-h-[700px] flex flex-col justify-end pt-20 overflow-hidden">
+    <!-- Map Background -->
+    <div class="absolute inset-0 z-0">
+      <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background-dark/90 z-10"></div>
+      <div 
+        id="map" 
+        class="w-full h-full bg-cover bg-center"
+        style="background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2070');"
+      ></div>
+      <!-- Map markers overlay -->
+      <div class="absolute inset-0 z-20 pointer-events-none">
+        {featuredPhotos.map((photo, i) => {
+          // Calculate approximate position based on lat/lng (simplified projection)
+          const x = ((photo.lng + 180) / 360) * 100;
+          const y = ((90 - photo.lat) / 180) * 100;
+          return (
+            <div 
+              class="absolute w-4 h-4 bg-accent rounded-full marker-pulse map-glow"
+              style={`left: ${x}%; top: ${y}%; transform: translate(-50%, -50%);`}
+              title={photo.location}
+            />
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="relative z-30 max-w-7xl mx-auto px-6 pb-24 w-full">
+      <div class="glass-panel rounded-2xl p-8 max-w-2xl">
+        <h1 class="text-4xl md:text-5xl font-display font-bold mb-4 text-white">
+          用镜头捕捉世界
+        </h1>
+        <p class="text-lg text-white/80 mb-6">
+          探索全球摄影师的精彩作品，在交互式地图上发现每一张照片背后的故事
+        </p>
+        <div class="flex gap-4">
+          <a href="/discovery" class="bg-accent hover:bg-accent/90 text-white px-6 py-3 rounded-full font-medium transition-colors inline-flex items-center gap-2">
+            <span class="material-symbols-outlined">explore</span>
+            开始探索
+          </a>
+          <a href="/upload" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-full font-medium transition-colors backdrop-blur-sm border border-white/20 inline-flex items-center gap-2">
+            <span class="material-symbols-outlined">add_photo_alternate</span>
+            上传作品
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 text-white/60 flex flex-col items-center gap-2">
+      <span class="text-sm">向下滚动</span>
+      <span class="material-symbols-outlined animate-bounce">keyboard_arrow_down</span>
+    </div>
+  </section>
+
+  <!-- Featured Photos Grid -->
+  <section class="bg-background-dark dark:bg-background-dark py-24 px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-12">
+        <div>
+          <h2 class="text-3xl font-display font-bold text-white mb-2">精选作品</h2>
+          <p class="text-white/60">来自全球摄影师的精彩瞬间</p>
+        </div>
+        <a href="/discovery" class="text-accent hover:text-accent/80 font-medium flex items-center gap-2 transition-colors">
+          查看全部
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {featuredPhotos.map(photo => (
+          <a href={`/photo/${photo.id}`} class="group glass-card rounded-xl overflow-hidden">
+            <div class="aspect-[4/3] overflow-hidden">
+              <img 
+                src={photo.url} 
+                alt={photo.title}
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+            <div class="p-4">
+              <h3 class="text-white font-medium text-lg mb-1">{photo.title}</h3>
+              <p class="text-white/50 text-sm flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">location_on</span>
+                {photo.location}
+              </p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-black/50 backdrop-blur-sm border-t border-white/10 py-12 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="text-2xl font-display font-bold text-white">GLOBAL FRAME</div>
+      <div class="flex gap-8 text-sm text-white/50">
+        <a href="/about" class="hover:text-white transition-colors">关于我们</a>
+        <a href="/privacy" class="hover:text-white transition-colors">隐私政策</a>
+        <a href="/terms" class="hover:text-white transition-colors">使用条款</a>
+      </div>
+      <p class="text-white/30 text-sm">© 2026 Global Frame. All rights reserved.</p>
+    </div>
+  </footer>
+</Layout>

@@ -1,0 +1,172 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+---
+
+<Layout title="上传作品 | Global Frame">
+  <Navbar />
+
+  <main class="pt-28 pb-24 px-6 min-h-screen bg-background-dark">
+    <div class="max-w-3xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl font-display font-bold text-white mb-4">上传你的作品</h1>
+        <p class="text-white/60">
+          与全球摄影爱好者分享你的精彩瞬间。每张照片都是一个故事的开始
+        </p>
+      </div>
+
+      <!-- Upload Area -->
+      <div class="glass-panel rounded-2xl p-8 mb-8">
+        <div 
+          id="drop-zone"
+          class="border-2 border-dashed border-white/20 rounded-xl p-12 text-center cursor-pointer hover:border-accent/50 hover:bg-white/5 transition-all"
+        >
+          <div class="mb-6">
+            <span class="material-symbols-outlined text-6xl text-white/30">cloud_upload</span>
+          </div>
+          <h3 class="text-xl font-medium text-white mb-2">拖拽照片到此处</h3>
+          <p class="text-white/50 text-sm mb-6">或点击选择文件</p>
+          <input 
+            type="file" 
+            id="file-input" 
+            accept="image/*" 
+            multiple 
+            class="hidden"
+          />
+          <button 
+            id="select-btn"
+            class="bg-accent hover:bg-accent/90 text-white px-6 py-2.5 rounded-full font-medium transition-colors"
+          >
+            选择照片
+          </button>
+          <p class="text-white/30 text-xs mt-4">支持 JPG、PNG、WebP，单文件最大 20MB</p>
+        </div>
+
+        <!-- Preview Area -->
+        <div id="preview-area" class="hidden mt-6">
+          <h4 class="text-white font-medium mb-4">已选择 <span id="file-count">0</span> 张照片</h4>
+          <div id="preview-grid" class="grid grid-cols-4 gap-3"></div>
+          <button 
+            id="upload-btn"
+            class="mt-6 w-full bg-accent hover:bg-accent/90 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <span class="material-symbols-outlined">upload</span>
+            开始上传
+          </button>
+        </div>
+      </div>
+
+      <!-- Info Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass-card rounded-xl p-6 text-center">
+          <span class="material-symbols-outlined text-3xl text-accent mb-3">location_on</span>
+          <h4 class="text-white font-medium mb-1">地理位置</h4>
+          <p class="text-white/50 text-sm">自动提取 EXIF GPS 信息，在地图上展示</p>
+        </div>
+        <div class="glass-card rounded-xl p-6 text-center">
+          <span class="material-symbols-outlined text-3xl text-accent mb-3">group</span>
+          <h4 class="text-white font-medium mb-1">邀请码制度</h4>
+          <p class="text-white/50 text-sm">仅受邀朋友可以上传，维护社区品质</p>
+        </div>
+        <div class="glass-card rounded-xl p-6 text-center">
+          <span class="material-symbols-outlined text-3xl text-accent mb-3">high_quality</span>
+          <h4 class="text-white font-medium mb-1">高清存储</h4>
+          <p class="text-white/50 text-sm">原图保存在 Cloudflare R2，支持大尺寸展示</p>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="mt-12">
+        <h3 class="text-xl font-medium text-white mb-6 text-center">常见问题</h3>
+        <div class="space-y-4">
+          <details class="glass-card rounded-lg p-4 group">
+            <summary class="text-white font-medium cursor-pointer flex items-center justify-between">
+              如何获得上传权限？
+              <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+            </summary>
+            <p class="text-white/60 text-sm mt-3">目前采用邀请码制度，你需要先获得邀请码才能上传作品。邀请码每个只能使用一次。</p>
+          </details>
+          <details class="glass-card rounded-lg p-4 group">
+            <summary class="text-white font-medium cursor-pointer flex items-center justify-between">
+              支持哪些格式？
+              <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+            </summary>
+            <p class="text-white/60 text-sm mt-3">支持 JPG、PNG、WebP 格式。建议使用高质量原图以获得最佳展示效果。</p>
+          </details>
+          <details class="glass-card rounded-lg p-4 group">
+            <summary class="text-white font-medium cursor-pointer flex items-center justify-between">
+              我的照片会被如何使用？
+              <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+            </summary>
+            <p class="text-white/60 text-sm mt-3">你的照片仅用于在 Global Frame 平台上展示，我们不会将其用于其他用途。</p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const selectBtn = document.getElementById('select-btn');
+    const previewArea = document.getElementById('preview-area');
+    const previewGrid = document.getElementById('preview-grid');
+    const fileCount = document.getElementById('file-count');
+
+    let selectedFiles = [];
+
+    selectBtn?.addEventListener('click', () => fileInput?.click());
+    
+    dropZone?.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('border-accent', 'bg-white/5');
+    });
+    
+    dropZone?.addEventListener('dragleave', () => {
+      dropZone.classList.remove('border-accent', 'bg-white/5');
+    });
+    
+    dropZone?.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-accent', 'bg-white/5');
+      handleFiles(e.dataTransfer?.files);
+    });
+
+    fileInput?.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+      selectedFiles = Array.from(files);
+      if (selectedFiles.length > 0) {
+        previewArea?.classList.remove('hidden');
+        fileCount.textContent = String(selectedFiles.length);
+        renderPreviews();
+      }
+    }
+
+    function renderPreviews() {
+      if (!previewGrid) return;
+      previewGrid.innerHTML = selectedFiles.map((file, i) => `
+        <div class="aspect-square rounded-lg overflow-hidden bg-white/10 relative">
+          <img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover" />
+          <button 
+            onclick="removeFile(${i})"
+            class="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white/70 hover:text-white"
+          >×</button>
+        </div>
+      `).join('');
+    }
+
+    (window as any).removeFile = (index: number) => {
+      selectedFiles.splice(index, 1);
+      fileCount.textContent = String(selectedFiles.length);
+      if (selectedFiles.length === 0) {
+        previewArea?.classList.add('hidden');
+      } else {
+        renderPreviews();
+      }
+    };
+  </script>
+</Layout>

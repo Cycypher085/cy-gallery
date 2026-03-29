@@ -1,0 +1,90 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+
+const photos = [
+  { id: 1, location: '云南·大理', lat: 25.6065, lng: 100.2679, title: '洱海晨曦', url: 'https://images.unsplash.com/photo-1528183429752-8e2a3f8f94b9?w=600', photographer: '摄影师A' },
+  { id: 2, location: '西藏·拉萨', lat: 29.6520, lng: 91.1721, title: '布达拉宫', url: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600', photographer: '摄影师B' },
+  { id: 3, location: '冰岛·雷克雅未克', lat: 64.1466, lng: -21.9426, title: '极光之夜', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=600', photographer: '摄影师C' },
+  { id: 4, location: '日本·京都', lat: 35.0116, lng: 135.7681, title: '竹林绿意', url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600', photographer: '摄影师D' },
+  { id: 5, location: '挪威·特罗姆瑟', lat: 69.6496, lng: 18.9560, title: '极光探险', url: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=600', photographer: '摄影师E' },
+  { id: 6, location: '新西兰·皇后镇', lat: -45.0312, lng: 168.6626, title: '湖光山色', url: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=600', photographer: '摄影师F' },
+  { id: 7, location: '瑞士·因特拉肯', lat: 46.6863, lng: 7.8632, title: '少女峰', url: 'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=600', photographer: '摄影师G' },
+  { id: 8, location: '意大利·威尼斯', lat: 45.4408, lng: 12.3155, title: '水城时光', url: 'https://images.unsplash.com/photo-1514890547357-a9ee288728e0?w=600', photographer: '摄影师H' },
+  { id: 9, location: '希腊·圣托里尼', lat: 36.3932, lng: 25.4615, title: '蓝顶白墙', url: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600', photographer: '摄影师I' },
+];
+
+const categories = ['全部', '自然', '城市', '建筑', '人文', '旅行'];
+---
+
+<Layout title="探索 | Global Frame">
+  <Navbar />
+
+  <main class="pt-28 pb-24 px-6 min-h-screen bg-background-dark">
+    <div class="max-w-7xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl font-display font-bold text-white mb-4">探索全球影像</h1>
+        <p class="text-white/60 max-w-2xl mx-auto">
+          发现来自世界各地摄影师的精彩作品，每一张照片都有一个故事
+        </p>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-12">
+        {categories.map((cat, i) => (
+          <button 
+            class:list={[
+              "px-5 py-2 rounded-full text-sm font-medium transition-all",
+              i === 0 
+                ? "bg-accent text-white" 
+                : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+            ]}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      <!-- Photo Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {photos.map(photo => (
+          <article class="group glass-card rounded-xl overflow-hidden cursor-pointer">
+            <div class="aspect-[4/3] overflow-hidden relative">
+              <img 
+                src={photo.url} 
+                alt={photo.title}
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="w-full bg-white/20 backdrop-blur-sm text-white py-2 rounded-lg text-sm font-medium hover:bg-white/30 transition-colors flex items-center justify-center gap-2">
+                  <span class="material-symbols-outlined text-sm">fullscreen</span>
+                  查看大图
+                </button>
+              </div>
+            </div>
+            <div class="p-5">
+              <h3 class="text-white font-medium text-lg mb-2">{photo.title}</h3>
+              <div class="flex items-center justify-between">
+                <p class="text-white/50 text-sm flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">location_on</span>
+                  {photo.location}
+                </p>
+                <p class="text-white/30 text-sm">{photo.photographer}</p>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <!-- Load More -->
+      <div class="text-center mt-12">
+        <button class="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full font-medium transition-colors inline-flex items-center gap-2">
+          <span class="material-symbols-outlined">refresh</span>
+          加载更多
+        </button>
+      </div>
+    </div>
+  </main>
+</Layout>
