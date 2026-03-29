@@ -18,8 +18,8 @@ const currentPath = Astro.url.pathname;
         {navItems.map(item => (
           <a 
             class:list={[
-              "hover:text-accent transition-colors",
-              { "text-accent": currentPath === item.href }
+              "hover:text-blue-500 dark:hover:text-blue-400 transition-colors",
+              { "text-blue-500 dark:text-blue-400": currentPath === item.href }
             ]} 
             href={item.href}
           >
@@ -33,17 +33,37 @@ const currentPath = Astro.url.pathname;
         <span class="material-symbols-outlined">search</span>
       </button>
       <a href="/upload">
-        <button class="bg-accent text-white px-6 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition-opacity">
+        <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors">
           加入社区
         </button>
       </a>
       <button 
         class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-        onclick="document.documentElement.classList.toggle('dark')"
+        onclick="toggleDarkMode()"
+        aria-label="Toggle dark mode"
       >
-        <span class="material-symbols-outlined dark:hidden">dark_mode</span>
-        <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+        <span class="material-symbols-outlined dark-icon hidden">dark_mode</span>
+        <span class="material-symbols-outlined light-icon">light_mode</span>
       </button>
     </div>
   </div>
 </nav>
+
+<script is:inline>
+  function updateThemeIcons() {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.querySelectorAll('.dark-icon').forEach(el => {
+      el.classList.toggle('hidden', !isDark);
+    });
+    document.querySelectorAll('.light-icon').forEach(el => {
+      el.classList.toggle('hidden', isDark);
+    });
+  }
+  
+  // Initial update
+  updateThemeIcons();
+  
+  // Watch for changes
+  const observer = new MutationObserver(updateThemeIcons);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+</script>

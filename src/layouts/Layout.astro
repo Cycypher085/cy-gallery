@@ -10,7 +10,7 @@ const { title, description = 'A personal photo gallery with interactive map' } =
 ---
 
 <!doctype html>
-<html lang="zh-CN" class="scroll-smooth dark">
+<html lang="zh-CN" class="scroll-smooth">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,8 +21,28 @@ const { title, description = 'A personal photo gallery with interactive map' } =
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script is:inline>
+    // Dark mode initialization - must run before page render
+    (function() {
+      const stored = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'dark' || (!stored && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+<body class="bg-[#F8F9FA] dark:bg-[#0F0F0F] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
   <slot />
+  
+  <script is:inline>
+    // Dark mode toggle function
+    window.toggleDarkMode = function() {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    };
+  </script>
 </body>
 </html>
