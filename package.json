@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "npm run build && wrangler dev",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed"
+    "test:e2e:headed": "playwright test --headed",
+    "generate-types": "wrangler types",
+    "deploy": "npm run build && wrangler deploy"
   },
   "repository": {
     "type": "git",
@@ -24,7 +26,7 @@
   "homepage": "https://github.com/Cycypher085/cy-gallery#readme",
   "dependencies": {
     "@astrojs/check": "^0.9.8",
-    "@astrojs/cloudflare": "^13.1.4",
+    "@astrojs/cloudflare": "^13.1.10",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/leaflet": "^1.9.21",
     "astro": "^6.1.1",
@@ -35,6 +37,10 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.59.1"
+    "@playwright/test": "^1.59.1",
+    "wrangler": "^4.83.0"
+  },
+  "overrides": {
+    "vite": "^7"
   }
 }
