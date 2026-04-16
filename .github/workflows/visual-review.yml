@@ -1,0 +1,149 @@
+name: Visual Review CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  PREVIEW_URL: ${{ github.event.inputs.preview_url || 'https://cy-gallery.cj664240.workers.dev' }}
+
+jobs:
+  test:
+    name: Playwright Tests + Visual Review
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build preview
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Start preview server
+        run: npm run preview -- --port 4321 &
+        env:
+          NODE_ENV: production
+
+      - name: Wait for server
+        run: npx wait-on http://localhost:4321 --timeout 30000
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+        env:
+          PREVIEW_URL: http://localhost:4321
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: playwright-report/*.png
+          retention-days: 14
+
+      - name: Generate Review Summary
+        if: always()
+        run: |
+          echo "## 📊 Global Frame Visual Review Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Preview URL:** ${{ env.PREVIEW_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # 从 JSON 报告读取结果
+          if [ -f playwright-report/results.json ]; then
+            PASSED=$(cat playwright-report/results.json | grep -o '"passed":[^,}]*' | head -1 | grep -o '[0-9]*')
+            FAILED=$(cat playwright-report/results.json | grep -o '"failed":[^,}]*' | head -1 | grep -o '[0-9]*')
+            SKIPPED=$(cat playwright-report/results.json | grep -o '"skipped":[^,}]*' | head -1 | grep -o '[0-9]*')
+            
+            echo "**测试结果:**" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Passed: ${PASSED:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- ❌ Failed: ${FAILED:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- ⏭️  Skipped: ${SKIPPED:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "### 🎨 视觉效果反馈" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "请查看上传的截图，反馈你的感受：" >> $GITHUB_STEP_SUMMARY
+          echo "1. 背景动画/粒子效果是否符合预期？" >> $GITHUB_STEP_SUMMARY
+          echo "2. 色彩搭配和整体氛围是否满意？" >> $GITHUB_STEP_SUMMARY
+          echo "3. 哪些地方需要改进？" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 评分标准" >> $GITHUB_STEP_SUMMARY
+          echo "| 维度 | 评分 (1-10) | 备注 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 功能性 | /10 | 按钮/链接/Filter 是否正常 |" >> $GITHUB_STEP_SUMMARY
+          echo "| 性能 | /10 | 加载速度/动画流畅度 |" >> $GITHUB_STEP_SUMMARY
+          echo "| 视觉效果 | /10 | 背景/粒子/渐变是否符合预期 |" >> $GITHUB_STEP_SUMMARY
+          echo "| 可访问性 | /10 | 键盘导航/清晰度 |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "请回复 **评分** 或直接描述你看到的问题，我会根据反馈继续优化 🚀" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('playwright-report/results.json', 'utf8'));
+            
+            const passed = results.stats?.passes || 0;
+            const failed = results.stats?.failures || 0;
+            const skipped = results.stats?.skipped || 0;
+            
+            const comment = `
+            ## 📊 Playwright Test Results
+            ✅ Passed: ${passed}
+            ❌ Failed: ${failed}
+            ⏭️  Skipped: ${skipped}
+            
+            **Preview:** ${process.env.PREVIEW_URL}
+            
+            ${failed > 0 ? '⚠️ Some tests failed. Please check the artifacts for screenshots.' : '🎉 All tests passed!'}
+            
+            ---
+            
+            ## 🎨 Visual Feedback Needed
+            
+            Please review the deployed site and share your feedback:
+            
+            | Dimension | Score (1-10) | Notes |
+            |-----------|-------------|-------|
+            | Functionality | /10 | Buttons, links, filters |
+            | Performance | /10 | Loading speed, animation smoothness |
+            | Visual Effects | /10 | Background, particles, gradients |
+            | Accessibility | /10 | Keyboard nav, clarity |
+            
+            Reply with your scores or describe issues you see. I'll continue optimizing based on your feedback! 🚀
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
