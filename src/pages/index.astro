@@ -161,7 +161,7 @@ const featuredPhotos = [
 </Layout>
 
 <script>
-  import L from 'https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js';
+  import L from 'leaflet';
   
   // Initialize map
   const map = L.map('map', {
@@ -182,13 +182,12 @@ const featuredPhotos = [
     maxZoom: 19
   }).addTo(map);
   
-  // Marker click handlers
+  // Marker click handlers - use a closure to capture the map instance
   document.querySelectorAll('[data-lat]').forEach(marker => {
     const el = marker as HTMLElement;
     el.addEventListener('click', () => {
       const lat = parseFloat(el.dataset.lat || '0');
       const lng = parseFloat(el.dataset.lng || '0');
-      map.flying = true;
       map.flyTo([lat, lng], 5, { duration: 2 });
     });
   });
