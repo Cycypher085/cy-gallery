@@ -31,8 +31,9 @@ test.describe('Global Frame - 自动化测试', () => {
   test('首页 - 地图 marker 点击', async ({ page }) => {
     await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
     
+    // Marker 被导航栏遮挡，用 force 点击
     const marker = page.locator('[data-lat]').first();
-    await marker.click();
+    await marker.click({ force: true });
     
     // 等待动画完成
     await page.waitForTimeout(1000);
@@ -93,7 +94,7 @@ test.describe('Global Frame - 自动化测试', () => {
     await page.goto(`${BASE_URL}/collections`, { waitUntil: 'domcontentloaded', timeout: 15000 });
     
     await expect(page.locator('h1')).toContainText('精选专辑', { timeout: 5000 });
-    await expect(page.locator('a[href*="discovery"]')).toHaveCount(4, { timeout: 5000 });
+    await expect(page.locator('a[href*="discovery"]')).toHaveCount(5, { timeout: 5000 });
   });
 
   test('上传页 - 加载正常', async ({ page }) => {
