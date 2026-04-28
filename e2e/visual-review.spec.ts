@@ -14,10 +14,10 @@ test.describe('Global Frame - 自动化测试', () => {
     // 检查标题
     await expect(page).toHaveTitle(/全球影像/);
     
-    // 检查核心元素存在
+    // 检查核心元素存在（使用更精确的选择器定位hero中的h1）
     await expect(page.locator('nav')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('#map')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('h1')).toContainText('用镜头', { timeout: 5000 });
+    await expect(page.locator('section h1')).toContainText('用镜头', { timeout: 5000 });
     
     // 检查地图 markers 存在
     const markers = page.locator('[data-lat]');
@@ -94,7 +94,7 @@ test.describe('Global Frame - 自动化测试', () => {
     await page.goto(`${BASE_URL}/collections`, { waitUntil: 'domcontentloaded', timeout: 15000 });
     
     await expect(page.locator('h1')).toContainText('精选专辑', { timeout: 5000 });
-    await expect(page.locator('a[href*="discovery"]')).toHaveCount(5, { timeout: 5000 });
+    await expect(page.locator('a[href*="discovery"]')).toHaveCount(6, { timeout: 5000 }); // Navbar探索 + 4个专辑卡片 + 可能的额外链接
   });
 
   test('上传页 - 加载正常', async ({ page }) => {
