@@ -8,48 +8,98 @@ const navItems = [
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 
-<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-  <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-    <div class="flex items-center gap-8">
-      <a class="text-2xl font-display font-bold tracking-tight" href="/">
-        GLOBAL FRAME
-      </a>
-      <div class="hidden md:flex items-center gap-6 text-sm font-medium tracking-wide">
-        {navItems.map(item => (
-          <a 
-            class:list={[
-              "hover:text-blue-500 dark:hover:text-blue-400 transition-colors",
-              { "text-blue-500 dark:text-blue-400": currentPath === item.href || currentPath === item.href + '/' }
-            ]} 
-            href={item.href}
-          >
-            {item.label}
-          </a>
-        ))}
-      </div>
+<nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <!-- Logo -->
+    <a class="text-xl font-display font-bold tracking-tight" href="/">
+      GLOBAL FRAME
+    </a>
+
+    <!-- Desktop Navigation -->
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium tracking-wide">
+      {navItems.map(item => (
+        <a 
+          class:list={[
+            "relative group transition-colors",
+            { "text-blue-500 dark:text-blue-400": currentPath === item.href || currentPath === item.href + '/' }
+          ]} 
+          href={item.href}
+        >
+          {item.label}
+          <span class:list={[
+            "absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left",
+            { "scale-x-100": currentPath === item.href || currentPath === item.href + '/' }
+          ]}></span>
+        </a>
+      ))}
     </div>
-    <div class="flex items-center gap-4">
-      <button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-        <span class="material-symbols-outlined">search</span>
+
+    <!-- Right Actions -->
+    <div class="flex items-center gap-2">
+      <!-- Search Button -->
+      <button class="p-2 hover:bg-white/10 dark:hover:bg-white/10 rounded-full transition-colors" aria-label="Search">
+        <span class="material-symbols-outlined text-xl">search</span>
       </button>
-      <a href="/upload">
-        <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors">
-          加入社区
-        </button>
-      </a>
+      
+      <!-- Theme Toggle -->
       <button 
-        class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+        class="p-2 hover:bg-white/10 dark:hover:bg-white/10 rounded-full transition-colors"
         onclick="toggleDarkMode()"
         aria-label="Toggle dark mode"
       >
-        <span class="material-symbols-outlined dark-icon hidden">dark_mode</span>
-        <span class="material-symbols-outlined light-icon">light_mode</span>
+        <span class="material-symbols-outlined dark-icon text-xl hidden">dark_mode</span>
+        <span class="material-symbols-outlined light-icon text-xl">light_mode</span>
       </button>
+
+      <!-- Upload CTA (Desktop) -->
+      <a href="/upload" class="hidden md:inline-flex">
+        <button class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors">
+          加入社区
+        </button>
+      </a>
+
+      <!-- Mobile Menu Button -->
+      <button 
+        id="mobile-menu-btn"
+        class="md:hidden p-2 hover:bg-white/10 rounded-full transition-colors"
+        onclick="toggleMobileMenu()"
+        aria-label="Toggle menu"
+      >
+        <span class="material-symbols-outlined text-xl menu-icon">menu</span>
+        <span class="material-symbols-outlined text-xl close-icon hidden">close</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="md:hidden hidden absolute top-full left-0 right-0 bg-[#0A0A0F]/95 dark:bg-[#0A0A0F]/95 backdrop-blur-lg border-b border-white/10">
+    <div class="px-6 py-4 space-y-3">
+      {navItems.map(item => (
+        <a 
+          class:list={[
+            "block py-3 px-4 rounded-xl transition-colors",
+            { 
+              "bg-blue-500/20 text-blue-400": currentPath === item.href || currentPath === item.href + '/',
+              "hover:bg-white/5": currentPath !== item.href && currentPath !== item.href + '/'
+            }
+          ]} 
+          href={item.href}
+        >
+          <span class="font-medium">{item.label}</span>
+          <span class="text-xs text-white/40 ml-2">{item.en}</span>
+        </a>
+      ))}
+      <a href="/upload" class="block mt-4">
+        <button class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full text-sm font-medium transition-colors">
+          加入社区
+        </button>
+      </a>
     </div>
   </div>
 </nav>
 
 <script is:inline>
+  // Theme icon update
   function updateThemeIcons() {
     const isDark = document.documentElement.classList.contains('dark');
     document.querySelectorAll('.dark-icon').forEach(el => {
@@ -60,7 +110,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
     });
   }
   
-  // Initial update - run immediately before paint to avoid flash
+  // Initial update
   (function() {
     updateThemeIcons();
   })();
@@ -68,4 +118,53 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
   // Watch for changes
   const observer = new MutationObserver(updateThemeIcons);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+  // Mobile menu toggle
+  window.toggleMobileMenu = function() {
+    const menu = document.getElementById('mobile-menu');
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const menuIcon = menuBtn.querySelector('.menu-icon');
+    const closeIcon = menuBtn.querySelector('.close-icon');
+    
+    menu.classList.toggle('hidden');
+    menuIcon.classList.toggle('hidden');
+    closeIcon.classList.toggle('hidden');
+  };
+
+  // Navbar scroll effect
+  (function() {
+    const navbar = document.getElementById('navbar');
+    let lastScroll = 0;
+    
+    function updateNavbar() {
+      const scrollY = window.scrollY;
+      
+      if (scrollY > 50) {
+        navbar.classList.add('bg-[#0A0A0F]/80', 'dark:bg-[#0A0A0F]/80', 'backdrop-blur-lg', 'border-b', 'border-white/5');
+      } else {
+        navbar.classList.remove('bg-[#0A0A0F]/80', 'dark:bg-[#0A0A0F]/80', 'backdrop-blur-lg', 'border-b', 'border-white/5');
+      }
+      
+      lastScroll = scrollY;
+    }
+    
+    window.addEventListener('scroll', updateNavbar, { passive: true });
+    updateNavbar();
+  })();
 </script>
+
+<style>
+  /* Ensure smooth transitions */
+  #mobile-menu {
+    transition: opacity 200ms ease;
+  }
+  
+  #mobile-menu.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  #mobile-menu:not(.hidden) {
+    opacity: 1;
+  }
+</style>

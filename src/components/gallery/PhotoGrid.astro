@@ -1,0 +1,153 @@
+---
+interface Props {
+  photos: Array<{
+    id: string;
+    url: string;
+    thumbnail?: string;
+    title?: string;
+    location?: string;
+    lat?: number;
+    lng?: number;
+    takenAt?: string;
+    tags: string[];
+  }>;
+  columns?: {
+    mobile?: number;
+    tablet?: number;
+    desktop?: number;
+    wide?: number;
+  };
+  enableLazyLoad?: boolean;
+  enableHoverEffect?: boolean;
+}
+
+const {
+  photos,
+  columns = { mobile: 1, tablet: 2, desktop: 3, wide: 4 },
+  enableLazyLoad = true,
+  enableHoverEffect = true
+} = Astro.props;
+---
+
+<div class="photo-grid" data-masonry>
+  {photos.map((photo, index) => (
+    <a
+      href={`/discovery?photo=${photo.id}`}
+      class:list={[
+        "photo-grid-item group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden transition-all duration-500",
+        { "hover:border-blue-500/50 hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:-translate-y-1": enableHoverEffect }
+      ]}
+      style={`animation-delay: ${index * 50}ms`}
+    >
+      <div class="aspect-[4/3] overflow-hidden relative">
+        <img
+          src={photo.thumbnail || photo.url}
+          alt={photo.title || 'Photo'}
+          loading={enableLazyLoad ? "lazy" : "eager"}
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        
+        {/* Gradient overlay */}
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
+        
+        {/* Location badge */}
+        {photo.location && (
+          <div class="absolute top-4 left-4 bg-black/40 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm text-blue-400">location_on</span>
+            <span class="text-white/90 text-sm">{photo.location}</span>
+          </div>
+        )}
+        
+        {/* Tags */}
+        {photo.tags && photo.tags.length > 0 && (
+          <div class="absolute top-4 right-4 flex gap-1.5 flex-wrap justify-end">
+            {photo.tags.slice(0, 2).map(tag => (
+              <span class="bg-blue-500/30 backdrop-blur-md text-blue-300 text-xs px-2 py-0.5 rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+        
+        {/* Title overlay at bottom */}
+        {photo.title && (
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <h3 class="text-white font-medium text-lg">{photo.title}</h3>
+            {photo.takenAt && (
+              <p class="text-white/50 text-sm flex items-center gap-1 mt-1">
+                <span class="material-symbols-outlined text-sm">calendar_today</span>
+                {new Date(photo.takenAt).toLocaleDateString('zh-CN')}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </a>
+  ))}
+</div>
+
+<style>
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols-mobile, 1), 1fr);
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .photo-grid {
+      grid-template-columns: repeat(var(--cols-tablet, 2), 1fr);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .photo-grid {
+      grid-template-columns: repeat(var(--cols-desktop, 3), 1fr);
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .photo-grid {
+      grid-template-columns: repeat(var(--cols-wide, 4), 1fr);
+    }
+  }
+  
+  /* Masonry effect - items with varying heights */
+  .photo-grid[data-masonry] {
+    grid-auto-rows: 0;
+    grid-template-rows: auto;
+  }
+  
+  .photo-grid[data-masonry] .photo-grid-item {
+    grid-row-end: span 1;
+  }
+  
+  /* Animation on load */
+  .photo-grid-item {
+    animation: fadeSlideUp 400ms ease-out forwards;
+    opacity: 0;
+  }
+  
+  @keyframes fadeSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  // Apply column variables
+  document.querySelectorAll('.photo-grid[data-masonry]').forEach(grid => {
+    const el = grid as HTMLElement;
+    const style = getComputedStyle(el);
+    // Column variables are set via CSS custom properties via inline style
+    el.style.setProperty('--cols-mobile', '1');
+    el.style.setProperty('--cols-tablet', '2');
+    el.style.setProperty('--cols-desktop', '3');
+    el.style.setProperty('--cols-wide', '4');
+  });
+</script>

@@ -1,0 +1,251 @@
+---
+interface Photo {
+  id: string;
+  url: string;
+  thumbnail?: string;
+  title?: string;
+  location?: string;
+  lat?: number;
+  lng?: number;
+  takenAt?: string;
+  camera?: string;
+  tags: string[];
+}
+
+interface Props {
+  photos: Photo[];
+  initialIndex?: number;
+}
+
+const { photos, initialIndex = 0 } = Astro.props;
+const photosJson = JSON.stringify(photos);
+---
+
+<div id="photo-viewer" class="fixed inset-0 z-[100] hidden" role="dialog" aria-modal="true">
+  <!-- Backdrop -->
+  <div id="viewer-backdrop" class="absolute inset-0 bg-black/95 backdrop-blur-sm"></div>
+  
+  <!-- Close button -->
+  <button 
+    id="viewer-close"
+    class="absolute top-4 right-4 z-10 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+    aria-label="Close"
+  >
+    <span class="material-symbols-outlined text-white text-3xl">close</span>
+  </button>
+  
+  <!-- Navigation arrows -->
+  <button 
+    id="viewer-prev"
+    class="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+    aria-label="Previous photo"
+  >
+    <span class="material-symbols-outlined text-white text-4xl">chevron_left</span>
+  </button>
+  
+  <button 
+    id="viewer-next"
+    class="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+    aria-label="Next photo"
+  >
+    <span class="material-symbols-outlined text-white text-4xl">chevron_right</span>
+  </button>
+  
+  <!-- Main image container -->
+  <div id="viewer-content" class="absolute inset-0 flex items-center justify-center p-16">
+    <img 
+      id="viewer-image"
+      src=""
+      alt=""
+      class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+    />
+  </div>
+  
+  <!-- Info bar -->
+  <div id="viewer-info" class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-lg border-t border-white/10 p-6">
+    <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-6">
+        {photos[0]?.location && (
+          <div class="flex items-center gap-2 text-white/80">
+            <span class="material-symbols-outlined text-blue-400">location_on</span>
+            <span id="viewer-location"></span>
+          </div>
+        )}
+        <div class="flex items-center gap-2 text-white/80">
+          <span class="material-symbols-outlined text-blue-400">calendar_today</span>
+          <span id="viewer-date"></span>
+        </div>
+        <div class="flex items-center gap-2 text-white/80">
+          <span class="material-symbols-outlined text-blue-400">photo_camera</span>
+          <span id="viewer-camera"></span>
+        </div>
+      </div>
+      
+      <div id="viewer-tags" class="flex gap-2 flex-wrap">
+        <!-- Tags injected here -->
+      </div>
+      
+      <div class="flex gap-2">
+        <button class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors" aria-label="Download">
+          <span class="material-symbols-outlined text-white">download</span>
+        </button>
+        <button class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors" aria-label="Share">
+          <span class="material-symbols-outlined text-white">share</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Thumbnail strip -->
+  <div class="absolute bottom-32 left-1/2 -translate-x-1/2 flex gap-2 max-w-full px-4 overflow-x-auto">
+    {photos.map((photo, index) => (
+      <button
+        class:list={[
+          "viewer-thumbnail w-16 h-12 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0",
+          { "border-blue-500 opacity-100": index === initialIndex },
+          { "border-transparent opacity-50 hover:opacity-75": index !== initialIndex }
+        ]}
+        data-index={index}
+      >
+        <img src={photo.thumbnail || photo.url} alt="" class="w-full h-full object-cover" />
+      </button>
+    ))}
+  </div>
+  
+  <!-- Counter -->
+  <div class="absolute top-4 left-4 bg-black/40 backdrop-blur-md rounded-full px-4 py-2">
+    <span id="viewer-counter" class="text-white text-sm font-medium"></span>
+  </div>
+</div>
+
+<script define:vars={{ photosJson, initialIndex }}>
+  const photos = JSON.parse(photosJson);
+  let currentIndex = initialIndex;
+  
+  const viewer = document.getElementById('photo-viewer');
+  const backdrop = document.getElementById('viewer-backdrop');
+  const closeBtn = document.getElementById('viewer-close');
+  const prevBtn = document.getElementById('viewer-prev');
+  const nextBtn = document.getElementById('viewer-next');
+  const image = document.getElementById('viewer-image');
+  const locationEl = document.getElementById('viewer-location');
+  const dateEl = document.getElementById('viewer-date');
+  const cameraEl = document.getElementById('viewer-camera');
+  const tagsEl = document.getElementById('viewer-tags');
+  const counterEl = document.getElementById('viewer-counter');
+  
+  function updateViewer(index) {
+    const photo = photos[index];
+    if (!photo) return;
+    
+    image.src = photo.url;
+    image.alt = photo.title || 'Photo';
+    if (locationEl) locationEl.textContent = photo.location || '-';
+    if (dateEl) dateEl.textContent = photo.takenAt ? new Date(photo.takenAt).toLocaleDateString('zh-CN') : '-';
+    if (cameraEl) cameraEl.textContent = photo.camera || '-';
+    if (counterEl) counterEl.textContent = `${index + 1} / ${photos.length}`;
+    
+    // Update tags
+    if (tagsEl) {
+      tagsEl.innerHTML = photo.tags.map(tag => 
+        `<span class="bg-blue-500/30 text-blue-300 text-xs px-2 py-0.5 rounded-full">${tag}</span>`
+      ).join('');
+    }
+    
+    // Update thumbnail selection
+    document.querySelectorAll('.viewer-thumbnail').forEach((thumb, i) => {
+      const el = thumb;
+      if (i === index) {
+        el.classList.add('border-blue-500', 'opacity-100');
+        el.classList.remove('border-transparent', 'opacity-50');
+      } else {
+        el.classList.remove('border-blue-500', 'opacity-100');
+        el.classList.add('border-transparent', 'opacity-50');
+      }
+    });
+    
+    currentIndex = index;
+  }
+  
+  function openViewer(index = 0) {
+    updateViewer(index);
+    viewer.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeViewer() {
+    viewer.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+  
+  function nextPhoto() {
+    updateViewer((currentIndex + 1) % photos.length);
+  }
+  
+  function prevPhoto() {
+    updateViewer((currentIndex - 1 + photos.length) % photos.length);
+  }
+  
+  // Event listeners
+  closeBtn.addEventListener('click', closeViewer);
+  backdrop.addEventListener('click', closeViewer);
+  prevBtn.addEventListener('click', prevPhoto);
+  nextBtn.addEventListener('click', nextPhoto);
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (viewer.classList.contains('hidden')) return;
+    
+    if (e.key === 'Escape') closeViewer();
+    if (e.key === 'ArrowLeft') prevPhoto();
+    if (e.key === 'ArrowRight') nextPhoto();
+  });
+  
+  // Thumbnail clicks
+  document.querySelectorAll('.viewer-thumbnail').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      updateViewer(parseInt(thumb.dataset.index));
+    });
+  });
+  
+  // Touch/swipe support
+  let touchStartX = 0;
+  let touchEndX = 0;
+  
+  viewer.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  
+  viewer.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextPhoto();
+      else prevPhoto();
+    }
+  }, { passive: true });
+  
+  // Click on photo to advance
+  image.addEventListener('click', (e) => {
+    const rect = image.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const halfWidth = rect.width / 2;
+    
+    if (clickX > halfWidth) nextPhoto();
+    else prevPhoto();
+  });
+  
+  // Expose open function globally
+  window.openPhotoViewer = openViewer;
+  
+  // Auto-open if triggered
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('photo')) {
+    const photoId = urlParams.get('photo');
+    const photoIndex = photos.findIndex(p => p.id === photoId);
+    if (photoIndex !== -1) {
+      setTimeout(() => openViewer(photoIndex), 100);
+    }
+  }
+</script>
