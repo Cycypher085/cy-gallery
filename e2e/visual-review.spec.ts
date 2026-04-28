@@ -9,7 +9,7 @@ test.describe('Global Frame - 自动化测试', () => {
     page.on('pageerror', err => errors.push(err.message));
     
     // 用 domcontentloaded 代替 networkidle，避免外部资源加载超时
-    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     // 检查标题
     await expect(page).toHaveTitle(/全球影像/);
@@ -29,7 +29,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('首页 - 地图 marker 点击', async ({ page }) => {
-    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     // Marker 被导航栏遮挡，用 force 点击
     const marker = page.locator('[data-lat]').first();
@@ -46,7 +46,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('首页 - Dark mode toggle', async ({ page }) => {
-    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     const toggleBtn = page.locator('button[aria-label="Toggle dark mode"]');
     await expect(toggleBtn).toBeVisible({ timeout: 5000 });
@@ -64,7 +64,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('探索页 - Filter 功能', async ({ page }) => {
-    await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     const cards = page.locator('article[data-category]');
     await expect(cards).toHaveCount(9, { timeout: 5000 });
@@ -83,7 +83,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('探索页 - 图片懒加载属性', async ({ page }) => {
-    await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     const lazyImages = page.locator('img[loading="lazy"]');
     const count = await lazyImages.count();
@@ -91,14 +91,14 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('专辑页 - 加载正常', async ({ page }) => {
-    await page.goto(`${BASE_URL}/collections`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(`${BASE_URL}/collections`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     await expect(page.locator('h1')).toContainText('精选专辑', { timeout: 5000 });
     await expect(page.locator('a[href*="discovery"]')).toHaveCount(6, { timeout: 5000 }); // Navbar探索 + 4个专辑卡片 + 可能的额外链接
   });
 
   test('上传页 - 加载正常', async ({ page }) => {
-    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     await expect(page.locator('h1')).toContainText('上传', { timeout: 5000 });
     await expect(page.locator('#drop-zone')).toBeVisible({ timeout: 5000 });
@@ -106,7 +106,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('Nav 链接高亮正确', async ({ page }) => {
-    await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     const activeLink = page.locator('nav a:text("探索")');
     await expect(activeLink).toHaveClass(/blue-/, { timeout: 5000 });
@@ -117,7 +117,7 @@ test.describe('Global Frame - 自动化测试', () => {
     page.on('pageerror', err => errors.push(err.message));
     
     const start = Date.now();
-    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     const loadTime = Date.now() - start;
     
     console.log(`Page load time: ${loadTime}ms`);
