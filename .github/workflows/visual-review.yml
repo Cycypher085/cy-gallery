@@ -75,10 +75,25 @@ jobs:
           echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          # 读取 JSON 报告
+          # 读取 JSON 报告 - 修复 JSON 解析
           if [ -f playwright-report/results.json ]; then
-            PASSED=$(cat playwright-report/results.json | grep -o '"passed":[^,}]*' | head -1 | grep -o '[0-9]*')
-            FAILED=$(cat playwright-report/results.json | grep -o '"failed":[^,}]*' | head -1 | grep -o '[0-9]*')
+            # 使用 python3 解析 JSON 避免 grep 正则表达式问题
+            TEST_RESULT=$(python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+suites = d.get('suites', [])
+passed = failed = 0
+for s in suites:
+    for s2 in s.get('suites', []):
+        for spec in s2.get('specs', []):
+            for tc in spec.get('tests', []):
+                status = tc.get('results', [{}])[0].get('status', '')
+                if status == 'passed': passed += 1
+                elif status == 'failed': failed += 1
+print(f'{passed},{failed}')
+" playwright-report/results.json 2>/dev/null)
+            PASSED=$(echo $TEST_RESULT | cut -d',' -f1)
+            FAILED=$(echo $TEST_RESULT | cut -d',' -f2)
             
             echo "**自动化测试结果:**" >> $GITHUB_STEP_SUMMARY
             echo "✅ Passed: \`${PASSED:-0}\`" >> $GITHUB_STEP_SUMMARY
@@ -110,10 +125,22 @@ jobs:
       - name: Notify via GitHub API
         if: always()
         run: |
-          # 构建通知消息
+          # 构建通知消息 - 使用 python3 解析 JSON
           FAILED_TESTS=""
           if [ -f playwright-report/results.json ]; then
-            FAILED=$(cat playwright-report/results.json | grep -o '"failed":[^,}]*' | head -1 | grep -o '[0-9]*')
+            FAILED=$(python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+suites = d.get('suites', [])
+failed = 0
+for s in suites:
+    for s2 in s.get('suites', []):
+        for spec in s2.get('specs', []):
+            for tc in spec.get('tests', []):
+                status = tc.get('results', [{}])[0].get('status', '')
+                if status == 'failed': failed += 1
+print(failed)
+" playwright-report/results.json 2>/dev/null)
             if [ "${FAILED:-0}" != "0" ]; then
               FAILED_TESTS="⚠️ ${FAILED} 个测试失败，请查看 Artifacts"
             fi
