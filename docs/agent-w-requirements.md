@@ -119,6 +119,25 @@ W酱规划 → C酱开发 → R酱测试 → W酱Review → 循环
 - R酱 需要测试新实现的功能
 - 24h密钥访客系统 需等待后端基础设施
 
+### 2026-04-28 - W酱 Review & 修复 (SQU-23)
+
+**问题发现：**
+- C酱的代码存在 Astro 6.x 兼容性问题，无法构建
+- 错误1: `src/content/config.ts` 路径已废弃 → 需改为 `src/content.config.ts`
+- 错误2: `entry.slug` 已废弃 → 需改为 `entry.id`
+- 错误3: `note.render()` 已废弃 → 需改为 `render(note)` 函数
+
+**W酱修复：**
+- 迁移 Content Collections 配置到 `src/content.config.ts`
+- 使用 Astro 6.x glob loader 重写笔记加载逻辑
+- 更新所有 slug 引用为 id
+- 修复 render 调用方式
+- 构建测试通过 ✅
+
+**已提交 Commit:** `d07dc06 feat: 完成 P0 前端任务（修复 Astro 6.x 兼容性问题）`
+
+**Issue SQU-23 状态:** ✅ 已完成 Review
+
 ---
 
 *最后更新: 2026-04-27*
