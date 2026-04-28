@@ -17,7 +17,7 @@ test.describe('Global Frame - 自动化测试', () => {
     // 检查核心元素存在（使用更精确的选择器定位hero中的h1）
     await expect(page.locator('nav')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('#map')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('section h1')).toContainText('用镜头', { timeout: 5000 });
+    await expect(page.locator('section h1').first()).toContainText('用镜头', { timeout: 5000 });
     
     // 检查地图 markers 存在
     const markers = page.locator('[data-lat]');
