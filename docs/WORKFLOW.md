@@ -1,8 +1,8 @@
-# Agent 协作工作流程 (v5.0)
+# Agent 协作工作流程 (v5.1)
 
-**版本:** 5.0  
-**更新日期:** 2026-04-28  
-**原因:** 润清指出开发策略需要调整，采用单一页面开发+标准化测试流程
+**版本:** 5.1  
+**更新日期:** 2026-05-05  
+**原因:** 新增基于 issue 评论的 FLOW handoff 结构化协议与校验门禁
 
 ---
 
@@ -92,6 +92,73 @@ screenshots/
 - 返回内容包含截图
 - 有问题创建新issue
 
+### 4.1 FLOW Handoff（最小改造，强制执行）
+
+为保证 planner / coder / tester 不是“口头 stage 流转”，而是通过 issue 线程真实传递信息，所有阶段交接必须使用结构化评论块：
+
+```md
+<!-- FLOW_HANDOFF_BEGIN -->
+Issue: SQU-6
+Flow-State: PLAN_READY
+From-Agent: planner
+To-Agent: coder
+Status: IN_PROGRESS
+Updated-At: 2026-05-05T13:30:00.000Z
+
+Summary:
+- 本轮完成了什么
+
+Inputs:
+- 交接输入（需求链接、设计文档、前置评论）
+
+Acceptance:
+- 可验证验收点
+
+Artifacts:
+- PR / commit / test log / screenshot
+
+Risks:
+- Low / Medium / High + 原因
+
+Next-Actions:
+- 下一个 agent 的明确执行动作
+<!-- FLOW_HANDOFF_END -->
+```
+
+### 4.2 命令行工具（本仓库）
+
+使用 `scripts/issue-handoff.mjs` 统一生成、提取、校验 handoff 评论：
+
+```bash
+# 1) 生成 handoff 评论草稿
+node scripts/issue-handoff.mjs emit \
+  --issue SQU-6 \
+  --flow PLAN_READY \
+  --from planner \
+  --to coder \
+  --status IN_PROGRESS \
+  --summary "完成范围定义||完成验收标准" \
+  --inputs "Linear issue SQU-6||docs/WORKFLOW.md" \
+  --acceptance "新增 Workflow Test 区块" \
+  --artifacts "docs/WORKFLOW.md" \
+  --risks "Low: 仅文案新增" \
+  --next "coder 开始实现并提交 PR" \
+  --out /tmp/handoff.md
+
+# 2) 校验评论结构是否符合协议（CI 可直接用）
+node scripts/issue-handoff.mjs validate --in /tmp/handoff.md
+
+# 3) 从 issue 评论文本中提取结构化数据
+node scripts/issue-handoff.mjs extract --in /tmp/handoff.md --json
+```
+
+### 4.3 交接门禁
+
+1. 当前 agent 在结束本轮前，必须先 `emit + validate` 通过，再发送 issue 评论。  
+2. 下一个 agent 开始执行前，必须先 `extract` 最新 handoff 评论作为输入。  
+3. 若 `validate` 失败，视为无效交接，不允许切换 Flow-State。  
+4. 所有 handoff 评论需保留在同一个 issue 线程，禁止私聊口头交接替代。  
+
 ---
 
 ## 五、分支管理
@@ -106,4 +173,4 @@ screenshots/
 ---
 
 *本文件由 W酱 维护*  
-*最后更新: 2026-04-28*
+*最后更新: 2026-05-05*

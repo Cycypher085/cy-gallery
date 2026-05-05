@@ -22,6 +22,11 @@ test.describe('Global Frame - 自动化测试', () => {
     // 检查地图 markers 存在
     const markers = page.locator('[data-lat]');
     await expect(markers).toHaveCount(6, { timeout: 5000 });
+
+    // 检查 Workflow Test 文案区块
+    const workflowBlock = page.locator('#workflow-test');
+    await expect(workflowBlock).toBeVisible({ timeout: 5000 });
+    await expect(workflowBlock.getByRole('heading', { name: 'Workflow Test' })).toBeVisible();
     
     // 无 page error（不是网络错误）
     const jsErrors = errors.filter(e => !e.includes('net::') && !e.includes('Failed to load resource'));

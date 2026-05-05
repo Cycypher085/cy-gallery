@@ -22,3 +22,24 @@
 - 测试结果：
 - 后续注意事项：
 
+### [2026-05-05] SQU-6 Workflow Test 首页区块
+- 背景：需要在主页新增用于流程验收的文案区块，并保持现有视觉风格不破坏布局。
+- 主要改动：
+  - `src/pages/index.astro` 新增 `#workflow-test` 区块与标题 `Workflow Test`。
+  - `e2e/visual-review.spec.ts` 在首页加载用例中增加区块可见性断言。
+- 为什么这样实现：将区块插入在“精选作品”与 Footer 之间，可见性高且对现有 Hero/地图结构零侵入；样式复用既有玻璃拟态类名，避免新增全局 CSS。
+- 测试结果：`npx playwright test e2e/visual-review.spec.ts --grep "首页 - 加载正常"` 通过（1 passed）。
+- 后续注意事项：当前环境需 Node 22+ 才能稳定运行 Astro 6 与 Playwright 工作流。
+
+### [2026-05-05] FLOW 最小改造（Issue 评论交接协议）
+- 背景：用户要求 stage 流转必须通过 issue 线程评论传递，而非仅会话内标记。
+- 主要改动：
+  - 新增 `scripts/issue-handoff-lib.mjs`（comment block 构建/解析/校验）。
+  - 新增 `scripts/issue-handoff.mjs` CLI（`emit`/`extract`/`validate`）。
+  - 新增 `scripts/__tests__/issue-handoff.test.mjs` 覆盖 round-trip、CLI 流程、无效评论拦截。
+  - `package.json` 增加 `test:handoff`。
+  - `docs/WORKFLOW.md` 升级到 v5.1 并写入强制 handoff 模板与 gate。
+- 为什么这样实现：通过统一标记块（`FLOW_HANDOFF_BEGIN/END`）和可执行校验，把“口头流转”变成机器可验证的 issue 交接协议。
+- 测试结果：`npm run test:handoff` 通过（4/4），并完成 `emit -> validate -> extract` 冒烟链路。
+- 后续注意事项：接入真实 Linear API 后，可在 CI 或 webhook 侧强制执行 `validate` 再允许变更 Flow-State。
+
