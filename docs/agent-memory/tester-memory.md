@@ -62,3 +62,5 @@
 ### 2026-05-05
 
 - 初始化 tester memory 模板。
+- SQU-6 回归中先后遇到两类环境阻塞：`playwright` 浏览器未安装与 Tailwind 原生可选依赖缺失，分别通过 `npx playwright install chromium` 与 `npm install` 修复后再执行目标用例。
+- 针对“最小改动”需求，优先运行与变更直接相关的 case（首页加载 smoke），并补充 `#workflow-test` 与标题文本断言可见性，测试信号更聚焦。
