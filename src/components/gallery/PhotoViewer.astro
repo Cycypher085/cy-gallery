@@ -1,15 +1,27 @@
 ---
 interface Photo {
   id: string;
+  mediaType?: 'image' | 'video';
   url: string;
   thumbnail?: string;
   title?: string;
   location?: string;
-  lat?: number;
-  lng?: number;
-  takenAt?: string;
-  camera?: string;
   tags: string[];
+  meta?: {
+    width?: number | null;
+    height?: number | null;
+    duration?: number | null;
+    capturedAt?: string | null;
+    cameraMake?: string | null;
+    cameraModel?: string | null;
+    lens?: string | null;
+    iso?: number | null;
+    aperture?: string | null;
+    shutter?: string | null;
+    focalLength?: string | null;
+    lat?: number | null;
+    lng?: number | null;
+  };
 }
 
 interface Props {
@@ -59,57 +71,113 @@ const photosJson = JSON.stringify(photos);
       alt=""
       class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
     />
+    <video
+      id="viewer-video"
+      src=""
+      controls
+      playsinline
+      class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl hidden"
+    ></video>
   </div>
   
   <!-- Info bar -->
   <div id="viewer-info" class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-lg border-t border-white/10 p-6">
-    <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-6">
-        {photos[0]?.location && (
-          <div class="flex items-center gap-2 text-white/80">
-            <span class="material-symbols-outlined text-blue-400">location_on</span>
-            <span id="viewer-location"></span>
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <section class="rounded-xl border border-white/10 bg-white/5 p-4" data-testid="viewer-params">
+        <div class="flex items-center gap-2 text-sm text-blue-300 mb-3">
+          <span class="material-symbols-outlined text-base">tune</span>
+          参数
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="space-y-1">
+            <p class="text-white/45">分辨率</p>
+            <p id="viewer-resolution" class="text-white/90">--</p>
           </div>
-        )}
-        <div class="flex items-center gap-2 text-white/80">
-          <span class="material-symbols-outlined text-blue-400">calendar_today</span>
-          <span id="viewer-date"></span>
+          <div class="space-y-1">
+            <p class="text-white/45">时长</p>
+            <p id="viewer-duration" class="text-white/90">--</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-white/45">ISO</p>
+            <p id="viewer-iso" class="text-white/90">--</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-white/45">光圈</p>
+            <p id="viewer-aperture" class="text-white/90">--</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-white/45">快门</p>
+            <p id="viewer-shutter" class="text-white/90">--</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-white/45">焦距</p>
+            <p id="viewer-focal-length" class="text-white/90">--</p>
+          </div>
+          <div class="space-y-1 col-span-2">
+            <p class="text-white/45">拍摄时间</p>
+            <p id="viewer-date" class="text-white/90">--</p>
+          </div>
         </div>
-        <div class="flex items-center gap-2 text-white/80">
-          <span class="material-symbols-outlined text-blue-400">photo_camera</span>
-          <span id="viewer-camera"></span>
+      </section>
+
+      <section class="rounded-xl border border-white/10 bg-white/5 p-4" data-testid="viewer-device">
+        <div class="flex items-center gap-2 text-sm text-blue-300 mb-3">
+          <span class="material-symbols-outlined text-base">devices</span>
+          设备
         </div>
-      </div>
-      
-      <div id="viewer-tags" class="flex gap-2 flex-wrap">
-        <!-- Tags injected here -->
-      </div>
-      
-      <div class="flex gap-2">
-        <button class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors" aria-label="Download">
-          <span class="material-symbols-outlined text-white">download</span>
-        </button>
-        <button class="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors" aria-label="Share">
-          <span class="material-symbols-outlined text-white">share</span>
-        </button>
-      </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <p class="text-white/45">相机</p>
+            <p id="viewer-camera" class="text-white/90">--</p>
+          </div>
+          <div>
+            <p class="text-white/45">镜头</p>
+            <p id="viewer-lens" class="text-white/90">--</p>
+          </div>
+          <div id="viewer-tags" class="flex gap-2 flex-wrap pt-1">
+            <!-- Tags injected here -->
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-xl border border-white/10 bg-white/5 p-4" data-testid="viewer-location-block">
+        <div class="flex items-center gap-2 text-sm text-blue-300 mb-3">
+          <span class="material-symbols-outlined text-base">location_on</span>
+          地理位置
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <p class="text-white/45">地点</p>
+            <p id="viewer-location" class="text-white/90">--</p>
+          </div>
+          <div>
+            <p class="text-white/45">经纬度</p>
+            <p id="viewer-latlng" class="text-white/90">--</p>
+          </div>
+          <a
+            id="viewer-map-link"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/20 text-blue-200 hover:bg-blue-500/30 transition-colors"
+          >
+            地图定位
+          </a>
+          <button
+            id="viewer-map-disabled"
+            type="button"
+            disabled
+            class="hidden px-3 py-1.5 rounded-full bg-white/10 text-white/35 cursor-not-allowed"
+          >
+            无可用位置
+          </button>
+        </div>
+      </section>
     </div>
   </div>
   
   <!-- Thumbnail strip -->
-  <div class="absolute bottom-32 left-1/2 -translate-x-1/2 flex gap-2 max-w-full px-4 overflow-x-auto">
-    {photos.map((photo, index) => (
-      <button
-        class:list={[
-          "viewer-thumbnail w-16 h-12 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0",
-          { "border-blue-500 opacity-100": index === initialIndex },
-          { "border-transparent opacity-50 hover:opacity-75": index !== initialIndex }
-        ]}
-        data-index={index}
-      >
-        <img src={photo.thumbnail || photo.url} alt="" class="w-full h-full object-cover" />
-      </button>
-    ))}
+  <div id="viewer-thumbnail-strip" class="absolute bottom-32 left-1/2 -translate-x-1/2 flex gap-2 max-w-full px-4 overflow-x-auto">
   </div>
   
   <!-- Counter -->
@@ -119,7 +187,7 @@ const photosJson = JSON.stringify(photos);
 </div>
 
 <script define:vars={{ photosJson, initialIndex }}>
-  const photos = JSON.parse(photosJson);
+  let photos = JSON.parse(photosJson);
   let currentIndex = initialIndex;
   
   const viewer = document.getElementById('photo-viewer');
@@ -128,21 +196,123 @@ const photosJson = JSON.stringify(photos);
   const prevBtn = document.getElementById('viewer-prev');
   const nextBtn = document.getElementById('viewer-next');
   const image = document.getElementById('viewer-image');
+  const video = document.getElementById('viewer-video');
   const locationEl = document.getElementById('viewer-location');
+  const latLngEl = document.getElementById('viewer-latlng');
   const dateEl = document.getElementById('viewer-date');
   const cameraEl = document.getElementById('viewer-camera');
+  const lensEl = document.getElementById('viewer-lens');
+  const resolutionEl = document.getElementById('viewer-resolution');
+  const durationEl = document.getElementById('viewer-duration');
+  const isoEl = document.getElementById('viewer-iso');
+  const apertureEl = document.getElementById('viewer-aperture');
+  const shutterEl = document.getElementById('viewer-shutter');
+  const focalLengthEl = document.getElementById('viewer-focal-length');
+  const mapLinkEl = document.getElementById('viewer-map-link');
+  const mapDisabledEl = document.getElementById('viewer-map-disabled');
   const tagsEl = document.getElementById('viewer-tags');
   const counterEl = document.getElementById('viewer-counter');
-  
+  const thumbnailStrip = document.getElementById('viewer-thumbnail-strip');
+
+  function formatDuration(seconds) {
+    if (!seconds || Number.isNaN(seconds)) return '--';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function formatDate(isoDate) {
+    if (!isoDate) return '--';
+    const parsed = new Date(isoDate);
+    if (Number.isNaN(parsed.getTime())) return '--';
+    return parsed.toLocaleString('zh-CN');
+  }
+
+  function toMapHref(lat, lng) {
+    return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=12/${lat}/${lng}`;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function renderThumbnails() {
+    if (!thumbnailStrip) return;
+    thumbnailStrip.innerHTML = photos
+      .map((photo, index) => {
+        const active = index === currentIndex;
+        return `
+          <button
+            class="viewer-thumbnail w-16 h-12 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+              active ? 'border-blue-500 opacity-100' : 'border-transparent opacity-50 hover:opacity-75'
+            }"
+            data-index="${index}"
+          >
+            <img src="${escapeHtml(photo.thumbnail || photo.url)}" alt="" class="w-full h-full object-cover" />
+          </button>
+        `;
+      })
+      .join('');
+  }
+
   function updateViewer(index) {
+    if (photos.length === 0) return;
     const photo = photos[index];
     if (!photo) return;
-    
-    image.src = photo.url;
-    image.alt = photo.title || 'Photo';
-    if (locationEl) locationEl.textContent = photo.location || '-';
-    if (dateEl) dateEl.textContent = photo.takenAt ? new Date(photo.takenAt).toLocaleDateString('zh-CN') : '-';
-    if (cameraEl) cameraEl.textContent = photo.camera || '-';
+
+    const meta = photo.meta || {};
+    const lat = meta.lat ?? null;
+    const lng = meta.lng ?? null;
+
+    if (photo.mediaType === 'video') {
+      if (video) {
+        video.src = photo.url;
+        video.classList.remove('hidden');
+      }
+      image.classList.add('hidden');
+    } else {
+      image.src = photo.url;
+      image.alt = photo.title || 'Photo';
+      image.classList.remove('hidden');
+      if (video) {
+        video.pause();
+        video.classList.add('hidden');
+      }
+    }
+
+    if (locationEl) locationEl.textContent = photo.location || '--';
+    if (latLngEl) latLngEl.textContent = lat != null && lng != null ? `${lat}, ${lng}` : '--';
+    if (dateEl) dateEl.textContent = formatDate(meta.capturedAt ?? null);
+    if (cameraEl) {
+      const camera = [meta.cameraMake, meta.cameraModel].filter(Boolean).join(' ').trim();
+      cameraEl.textContent = camera || '--';
+    }
+    if (lensEl) lensEl.textContent = meta.lens ?? '--';
+    if (resolutionEl) {
+      resolutionEl.textContent = meta.width && meta.height ? `${meta.width} x ${meta.height}` : '--';
+    }
+    if (durationEl) durationEl.textContent = formatDuration(meta.duration ?? null);
+    if (isoEl) isoEl.textContent = meta.iso != null ? String(meta.iso) : '--';
+    if (apertureEl) apertureEl.textContent = meta.aperture ?? '--';
+    if (shutterEl) shutterEl.textContent = meta.shutter ?? '--';
+    if (focalLengthEl) focalLengthEl.textContent = meta.focalLength ?? '--';
+
+    if (mapLinkEl && mapDisabledEl) {
+      if (lat != null && lng != null) {
+        mapLinkEl.href = toMapHref(lat, lng);
+        mapLinkEl.classList.remove('hidden');
+        mapDisabledEl.classList.add('hidden');
+      } else {
+        mapLinkEl.classList.add('hidden');
+        mapDisabledEl.classList.remove('hidden');
+      }
+    }
+
     if (counterEl) counterEl.textContent = `${index + 1} / ${photos.length}`;
     
     // Update tags
@@ -153,7 +323,7 @@ const photosJson = JSON.stringify(photos);
     }
     
     // Update thumbnail selection
-    document.querySelectorAll('.viewer-thumbnail').forEach((thumb, i) => {
+    thumbnailStrip?.querySelectorAll('.viewer-thumbnail').forEach((thumb, i) => {
       const el = thumb;
       if (i === index) {
         el.classList.add('border-blue-500', 'opacity-100');
@@ -168,6 +338,7 @@ const photosJson = JSON.stringify(photos);
   }
   
   function openViewer(index = 0) {
+    if (photos.length === 0) return;
     updateViewer(index);
     viewer.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -176,13 +347,18 @@ const photosJson = JSON.stringify(photos);
   function closeViewer() {
     viewer.classList.add('hidden');
     document.body.style.overflow = '';
+    if (video) {
+      video.pause();
+    }
   }
   
   function nextPhoto() {
+    if (photos.length === 0) return;
     updateViewer((currentIndex + 1) % photos.length);
   }
   
   function prevPhoto() {
+    if (photos.length === 0) return;
     updateViewer((currentIndex - 1 + photos.length) % photos.length);
   }
   
@@ -202,10 +378,13 @@ const photosJson = JSON.stringify(photos);
   });
   
   // Thumbnail clicks
-  document.querySelectorAll('.viewer-thumbnail').forEach(thumb => {
-    thumb.addEventListener('click', () => {
-      updateViewer(parseInt(thumb.dataset.index));
-    });
+  thumbnailStrip?.addEventListener('click', (e) => {
+    const target = e.target;
+    const thumb = target.closest('.viewer-thumbnail');
+    if (!thumb) return;
+    const index = Number(thumb.dataset.index);
+    if (Number.isNaN(index)) return;
+    updateViewer(index);
   });
   
   // Touch/swipe support
@@ -236,8 +415,21 @@ const photosJson = JSON.stringify(photos);
     else prevPhoto();
   });
   
+  renderThumbnails();
+
   // Expose open function globally
   window.openPhotoViewer = openViewer;
+  window.setPhotoViewerPhotos = (nextPhotos) => {
+    if (!Array.isArray(nextPhotos) || nextPhotos.length === 0) return;
+    photos = nextPhotos;
+    if (currentIndex >= photos.length) {
+      currentIndex = 0;
+    }
+    renderThumbnails();
+    if (!viewer.classList.contains('hidden')) {
+      updateViewer(currentIndex);
+    }
+  };
   
   // Auto-open if triggered
   const urlParams = new URLSearchParams(window.location.search);

@@ -67,7 +67,8 @@ test.describe('Global Frame - 自动化测试', () => {
     await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     const cards = page.locator('article[data-category]');
-    await expect(cards).toHaveCount(9, { timeout: 5000 });
+    const totalCards = await cards.count();
+    expect(totalCards).toBeGreaterThanOrEqual(9);
     
     // 点击 "自然" filter
     await page.click('button[data-filter="自然"]', { timeout: 5000 });
@@ -79,7 +80,7 @@ test.describe('Global Frame - 自动化测试', () => {
         .filter(el => (el as HTMLElement).style.display !== 'none').length;
     });
     expect(visibleCount).toBeGreaterThan(0);
-    expect(visibleCount).toBeLessThan(9);
+    expect(visibleCount).toBeLessThan(totalCards);
   });
 
   test('探索页 - 图片懒加载属性', async ({ page }) => {
@@ -103,6 +104,70 @@ test.describe('Global Frame - 自动化测试', () => {
     await expect(page.locator('h1')).toContainText('上传', { timeout: 5000 });
     await expect(page.locator('#drop-zone')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('#select-btn')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('上传页 - 非支持格式给出提示', async ({ page }) => {
+    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    await page.setInputFiles('#file-input', {
+      name: 'unsupported.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('not supported format'),
+    });
+
+    const alert = page.getByTestId('upload-alert');
+    await expect(alert).toBeVisible({ timeout: 5000 });
+    await expect(alert).toContainText('跳过');
+    await expect(page.locator('[data-testid="media-queue-item"]')).toHaveCount(0);
+  });
+
+  test('上传页 - 图片元数据队列与缺失位置兜底', async ({ page }) => {
+    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    const tinyPngBase64 =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO5sVuoAAAAASUVORK5CYII=';
+    const pngBuffer = Buffer.from(tinyPngBase64, 'base64');
+
+    await page.setInputFiles('#file-input', {
+      name: 'tiny.png',
+      mimeType: 'image/png',
+      buffer: pngBuffer,
+    });
+
+    const firstItem = page.locator('[data-testid="media-queue-item"]').first();
+    await expect(firstItem).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="meta-resolution"]').first()).toContainText('1 x 1');
+    await expect(page.locator('[data-testid="meta-location"]').first()).toContainText('--');
+    await expect(page.getByTestId('map-link-disabled').first()).toBeVisible();
+  });
+
+  test('上传页 - 同步到探索页并可在查看器看到信息区', async ({ page }) => {
+    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    const jpgBuffer = Buffer.from([
+      0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46,
+      0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x60,
+      0x00, 0x60, 0x00, 0x00, 0xff, 0xd9,
+    ]);
+
+    await page.setInputFiles('#file-input', {
+      name: 'meta-test.jpg',
+      mimeType: 'image/jpeg',
+      buffer: jpgBuffer,
+    });
+
+    const syncBtn = page.getByTestId('sync-discovery-btn');
+    await expect(syncBtn).toBeEnabled({ timeout: 5000 });
+    await syncBtn.click();
+    await expect(page.getByTestId('upload-alert')).toContainText('已同步');
+
+    await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+    await expect(page.locator('[data-testid="gallery-card"]').first()).toBeVisible({ timeout: 5000 });
+    await page.locator('.open-viewer-btn').first().click();
+
+    await expect(page.getByTestId('viewer-params')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('viewer-device')).toBeVisible();
+    await expect(page.getByTestId('viewer-location-block')).toBeVisible();
   });
 
   test('Nav 链接高亮正确', async ({ page }) => {
