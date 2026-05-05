@@ -62,3 +62,18 @@
 ### 2026-05-05
 
 - 初始化 tester memory 模板。
+
+### 2026-05-05 - SQU-6 Workflow Test 验收
+
+- 通过项：
+  - 首页新增 `Workflow Test` 文案区块可见（通过新增自动化断言验证）。
+  - 相关首页加载用例执行通过：`1 passed`。
+- 失败项：
+  - 初次执行失败，原因为 Playwright 浏览器二进制未安装（环境问题，非功能缺陷）。
+- 阻塞项：
+  - 无。
+- 风险等级：
+  - Low。变更仅为新增展示区块与现有用例扩展，回归影响面小。
+- 复现证据：
+  - 失败证据：`browserType.launch: Executable doesn't exist`。
+  - 修复后证据：`npx playwright test ... --grep "首页 - 加载正常"` => `1 passed (2.0s)`。
