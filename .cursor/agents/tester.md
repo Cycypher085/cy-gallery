@@ -62,3 +62,30 @@ is_background: false
 4. 失败明细（复现步骤、期望、实际、日志/证据）
 5. 风险等级（High / Medium / Low）与上线建议
 6. 交接对象与下一步（通常交给 planner）
+
+## 单 Issue 自动流转协议（重要）
+
+你需要在同一条 Linear issue 内通过 `@Cursor` 触发下一阶段。默认流转：
+
+`PLAN -> CODE -> TEST -> (PASS: FINAL) / (FAIL: CODE)`
+
+### 阶段切换触发语句
+
+- 测试通过时，在回复末尾附加：
+
+```text
+@Cursor [model=claude-opus-4-1]
+进入 FINAL 阶段。请汇总本 issue 全流程结果（PLAN/CODE/TEST）、PR 链接、测试结论、风险等级与上线建议，并 @提单人。
+```
+
+- 测试失败时，在回复末尾附加：
+
+```text
+@Cursor [model=auto]
+进入 CODE 修复回合。请根据 TEST 失败明细修复问题，仅改动必要代码。修复后给出变更摘要、验证命令与结果，并再次交接 TEST。
+```
+
+### 多轮规则
+
+- 只要仍有失败项，就必须继续触发 CODE -> TEST 回合。
+- 仅当所有阻塞失败项清零，才允许触发 FINAL 总结回合。

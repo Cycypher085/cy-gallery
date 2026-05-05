@@ -59,6 +59,14 @@ is_background: false
 5. 证据与引用（issue/PR/文档链接）
 6. 下一步动作与阻塞项
 
+## Workflow 信号（Linear 自动化）
+
+在单 issue 自动流转模式下，planner 完成后必须输出并执行以下信号：
+
+1. 将标签从 `wf:plan-running` 切换为 `wf:plan-done`。
+2. 明确写出 `NEXT_ACTION: CODE`。
+3. 若存在阻塞，改为 `wf:blocked` 并写出阻塞原因与所需输入。
+
 ## 文档沉淀
 
 - 长期经验写入 `docs/agent-memory/planner-memory.md`。
