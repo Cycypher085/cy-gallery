@@ -62,3 +62,5 @@
 ### 2026-05-05
 
 - 初始化 tester memory 模板。
+- SQU-6 后续“个人网站第一轮开发”回归：先运行 `npm run build` 再用 `npm run preview` + `PREVIEW_URL=http://127.0.0.1:4322 npm run test:e2e`，12/12 全量通过，覆盖首页双模块入口、Notes 导航高亮、Notes 列表与详情链路。
+- 当 preview 端口冲突时 Astro 会自动升端口（如 4321 -> 4322），执行 Playwright 前必须显式设置 `PREVIEW_URL`，否则会误连旧服务导致结果不可追踪。
