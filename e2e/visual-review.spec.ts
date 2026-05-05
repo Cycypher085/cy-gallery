@@ -18,6 +18,8 @@ test.describe('Global Frame - 自动化测试', () => {
     await expect(page.locator('nav')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('#map')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('section h1').first()).toContainText('用镜头', { timeout: 5000 });
+    await expect(page.locator('#workflow-test')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#workflow-test h2')).toHaveText('Workflow Test', { timeout: 5000 });
     
     // 检查地图 markers 存在
     const markers = page.locator('[data-lat]');
