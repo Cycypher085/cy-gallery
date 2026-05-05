@@ -1,0 +1,32 @@
+---
+description: linear 可观测协作与回合汇报规范
+alwaysApply: true
+---
+
+# Linear Observability and Handoff
+
+适用于 planner / coder / tester 的统一回合输出规范，确保在 Linear 中可观测、可追踪。
+
+## 每轮回复必须包含
+
+1. Stage: 当前阶段（PLAN / CODE / TEST）
+2. Status: 状态（IN_PROGRESS / BLOCKED / DONE）
+3. Summary: 本轮完成事项（1-3 条）
+4. Artifacts: 关键证据（PR、日志、测试结果、截图）
+5. Risks: 风险等级（High / Medium / Low）与原因
+6. Next Handoff: 下一步由谁接手（planner / coder / tester）和执行动作
+
+## Linear 任务命名建议
+
+- `[PLAN] <feature>`
+- `[CODE] <feature>`
+- `[TEST] <feature>`
+
+## 模型声明要求
+
+每个任务首条输出应声明当前模型选择与理由；若使用 `model: inherit`，必须说明继承来源。
+
+## 统计可见性边界
+
+- 可报告：任务状态、执行命令、测试结果、PR 链接。
+- 不臆造：底层 provider 精确 API 调用次数（若系统未提供则明确写“不可见”）。

@@ -1,0 +1,43 @@
+{
+  "mcpServers": {
+    "github": {
+      "url": "${env:GITHUB_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${env:GITHUB_MCP_TOKEN}"
+      }
+    },
+    "linear": {
+      "url": "${env:LINEAR_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${env:LINEAR_MCP_TOKEN}"
+      }
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "${env:POSTGRES_URL}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
+    }
+  }
+}
