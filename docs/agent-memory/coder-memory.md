@@ -22,3 +22,10 @@
 - 测试结果：
 - 后续注意事项：
 
+### [2026-05-05] 首页双模块入口 + Notes 导航 + 笔记内容与 E2E
+- 背景：个人站点第一轮静态交付，画廊与笔记双入口、导航与回归覆盖。
+- 主要改动：`index.astro` 增加 `id="workflow-test"` 的双卡片区块（discovery / notes）；`Navbar` 增加「笔记」并用前缀匹配实现 `/notes` 与 `/notes/[slug]` 高亮；`src/content/notes` 新增 3 篇 markdown；`visual-review.spec.ts` 扩展首页与笔记流断言。
+- 为什么这样实现：沿用站点既有 `bg-white/5`、`backdrop-blur`、`border-white/10` 玻璃风格；导航高亮不能用精确相等匹配子路径；E2E 用 `data-testid` 与当前 4 条非 draft 笔记数量避免脆弱文案匹配。
+- 测试结果：`npm run build` Pass；`npm run preview` + `npm run test:e2e` 12 tests Pass。
+- 后续注意事项：若未来增减笔记数量或启用 draft，需同步调整 `article.note-card` 的 `toHaveCount` 或改为 `>=` 断言。
+

@@ -112,6 +112,46 @@ test.describe('Global Frame - 自动化测试', () => {
     await expect(activeLink).toHaveClass(/blue-/, { timeout: 5000 });
   });
 
+  test('首页 - 双模块入口区块可见', async ({ page }) => {
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    const workflow = page.locator('#workflow-test');
+    await expect(workflow).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('home-module-gallery')).toBeVisible();
+    await expect(page.getByTestId('home-module-notes')).toBeVisible();
+    await expect(page.getByTestId('home-cta-discovery')).toHaveAttribute('href', '/discovery');
+    await expect(page.getByTestId('home-cta-notes')).toHaveAttribute('href', '/notes');
+  });
+
+  test('导航 - 可进入笔记列表', async ({ page }) => {
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    await page.locator('nav').getByRole('link', { name: '笔记' }).click();
+    await expect(page).toHaveURL(/\/notes\/?$/);
+    await expect(page.locator('h1').filter({ hasText: '学习笔记' })).toBeVisible({ timeout: 5000 });
+
+    const notesLink = page.locator('nav').getByRole('link', { name: '笔记' });
+    await expect(notesLink).toHaveClass(/blue-/);
+  });
+
+  test('笔记 - 列表可见并可进入详情', async ({ page }) => {
+    await page.goto(`${BASE_URL}/notes`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    const cards = page.locator('article.note-card');
+    await expect(cards).toHaveCount(4, { timeout: 5000 });
+
+    const firstDetail = cards.first().locator('h2 a');
+    const href = await firstDetail.getAttribute('href');
+    expect(href).toMatch(/^\/notes\//);
+
+    await firstDetail.click();
+    await expect(page).toHaveURL(new RegExp(`^${BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\/notes\\/.+`));
+    await expect(page.locator('article h1').first()).toBeVisible({ timeout: 5000 });
+
+    const notesNav = page.locator('nav').getByRole('link', { name: '笔记' });
+    await expect(notesNav).toHaveClass(/blue-/);
+  });
+
   test('页面加载性能 - 无 JS 错误', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', err => errors.push(err.message));
