@@ -31,3 +31,15 @@
 - 测试结果：`npx playwright test e2e/visual-review.spec.ts --grep "首页 - 加载正常"` 通过（1 passed）。
 - 后续注意事项：当前环境需 Node 22+ 才能稳定运行 Astro 6 与 Playwright 工作流。
 
+### [2026-05-05] FLOW 最小改造（Issue 评论交接协议）
+- 背景：用户要求 stage 流转必须通过 issue 线程评论传递，而非仅会话内标记。
+- 主要改动：
+  - 新增 `scripts/issue-handoff-lib.mjs`（comment block 构建/解析/校验）。
+  - 新增 `scripts/issue-handoff.mjs` CLI（`emit`/`extract`/`validate`）。
+  - 新增 `scripts/__tests__/issue-handoff.test.mjs` 覆盖 round-trip、CLI 流程、无效评论拦截。
+  - `package.json` 增加 `test:handoff`。
+  - `docs/WORKFLOW.md` 升级到 v5.1 并写入强制 handoff 模板与 gate。
+- 为什么这样实现：通过统一标记块（`FLOW_HANDOFF_BEGIN/END`）和可执行校验，把“口头流转”变成机器可验证的 issue 交接协议。
+- 测试结果：`npm run test:handoff` 通过（4/4），并完成 `emit -> validate -> extract` 冒烟链路。
+- 后续注意事项：接入真实 Linear API 后，可在 CI 或 webhook 侧强制执行 `validate` 再允许变更 Flow-State。
+
