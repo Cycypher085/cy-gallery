@@ -48,3 +48,17 @@
 - 测试结果：`npm run build` Pass；`PREVIEW_URL=http://127.0.0.1:4322 npm run test:e2e` 15 tests Pass。
 - 后续注意事项：若后续接入后端真实存储，需要将 `gf-discovery-media` 本地同步替换为服务端数据源，并保留无 EXIF 字段兜底逻辑。
 
+### [2026-05-05] 第四轮重构：主题/搜索/Discovery 同步与地图修复
+- 背景：进入下一轮重构后，优先修复 P0 交互问题（主题切换、全局搜索不可用、Discovery 与 Viewer 同步及地图初始化问题），并优化首页视觉标记与上传快照可视反馈。
+- 主要改动：
+  - `Layout.astro`：重构主题初始化与切换逻辑，补充 `data-theme` 同步，并补上 Leaflet JS CDN 引入，修复地图运行时依赖缺失。
+  - `global.css`：引入 light/dark 变量体系、`site-shell` 背景与基础排版规则，统一玻璃组件基于变量渲染，降低“仅图标切换”的假切换问题。
+  - `Navbar.astro`：实现全局搜索弹层（`Ctrl/Cmd + K`、遮罩关闭、回车跳转 `/notes?q=`）、滚动态样式与主题图标同步修复。
+  - `discovery.astro`：修复 viewer 数据同步函数名（`setPhotoViewerPhotos`）、分类筛选兼容多值、地图懒初始化与主题底图选择。
+  - `notes/index.astro`：支持 `?q=` 与 `?tag=` 查询参数回填并即时筛选。
+  - `upload.astro`：新增已保存快照列表渲染（保存后即时可见，刷新后可恢复）。
+  - `index.astro`：优化 Hero 文案排版与地图 marker 视觉（可点击胶囊标签 + 脉冲核心点）。
+- 为什么这样实现：先修复 P0 的“脚本链路可执行”和“状态可见”问题，再做视觉迭代，可显著降低后续 UI 改造时的定位成本。
+- 测试结果：`npm run build` Pass；`npm run test:e2e:with-screenshots` 16/16 Pass。
+- 后续注意事项：当前多页面仍使用部分固定深色类名，后续若继续推进完整主题化，建议分批替换 `text-white/*` 与 `bg-[#0F0F0F]` 为 design-token 类，避免一次性大改引入视觉回归。
+

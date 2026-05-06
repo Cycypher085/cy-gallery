@@ -37,15 +37,26 @@ const featuredPhotos = [
     <div class="absolute inset-0 z-[25] pointer-events-none">
       {featuredPhotos.map((photo) => {
         return (
-          <div 
-            class="absolute w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full cursor-pointer pointer-events-auto shadow-[0_0_20px_rgba(59,130,246,0.8),0_0_40px_rgba(59,130,246,0.4)] animate-pulse hover:scale-150 transition-transform duration-300"
-            style={`left: ${((photo.lng + 180) / 360) * 100}%; top: ${((90 - photo.lat) / 180) * 100}%; transform: translate(-50%, -50%);`}
+          <button
+            type="button"
+            class="group absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
+            style={`left: ${((photo.lng + 180) / 360) * 100}%; top: ${((90 - photo.lat) / 180) * 100}%;`}
             data-lat={photo.lat}
             data-lng={photo.lng}
             data-title={photo.title}
             data-location={photo.location}
             data-url={photo.url}
-          />
+            data-map-marker="true"
+            aria-label={`定位到 ${photo.location}`}
+          >
+            <span class="relative flex h-6 w-6 items-center justify-center rounded-full border border-blue-200/40 bg-gradient-to-br from-blue-400 to-blue-600 shadow-[0_0_20px_rgba(59,130,246,0.6)] transition-transform duration-300 group-hover:scale-110">
+              <span class="absolute inset-0 rounded-full border border-blue-200/35 marker-pulse"></span>
+              <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+            </span>
+            <span class="mt-1 inline-block rounded-full border border-white/15 bg-black/45 px-2 py-0.5 text-[11px] text-white/90 opacity-0 transition-opacity group-hover:opacity-100">
+              {photo.location}
+            </span>
+          </button>
         );
       })}
     </div>
@@ -58,7 +69,7 @@ const featuredPhotos = [
           <span class="text-blue-400 text-sm font-medium tracking-wider">交互式摄影地图</span>
         </div>
         <h1 class="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">
-          用镜头<br/>捕捉世界
+          用镜头捕捉世界
         </h1>
         <p class="text-lg text-white/70 mb-8 max-w-xl leading-relaxed">
           探索全球摄影师的精彩作品，在交互式地图上发现每一张照片背后的故事
@@ -236,7 +247,7 @@ const featuredPhotos = [
   }).addTo(map);
   
   // Marker click handlers - use a closure to capture the map instance
-  document.querySelectorAll('[data-lat]').forEach(marker => {
+  document.querySelectorAll('[data-map-marker]').forEach(marker => {
     const el = marker as HTMLElement;
     el.addEventListener('click', () => {
       const lat = parseFloat(el.dataset.lat || '0');

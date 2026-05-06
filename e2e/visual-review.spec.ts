@@ -50,17 +50,18 @@ test.describe('Global Frame - 自动化测试', () => {
     
     const toggleBtn = page.locator('button[aria-label="Toggle dark mode"]');
     await expect(toggleBtn).toBeVisible({ timeout: 5000 });
+    const beforeDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
     
     await toggleBtn.click();
     await page.waitForTimeout(200);
     
     const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
-    expect(isDark).toBe(true);
+    expect(isDark).toBe(!beforeDark);
     
     // 刷新检查持久化
     await page.reload({ waitUntil: 'domcontentloaded' });
     const isDarkAfterReload = await page.evaluate(() => document.documentElement.classList.contains('dark'));
-    expect(isDarkAfterReload).toBe(true);
+    expect(isDarkAfterReload).toBe(isDark);
   });
 
   test('探索页 - Filter 功能', async ({ page }) => {
@@ -80,7 +81,14 @@ test.describe('Global Frame - 自动化测试', () => {
         .filter(el => (el as HTMLElement).style.display !== 'none').length;
     });
     expect(visibleCount).toBeGreaterThan(0);
-    expect(visibleCount).toBeLessThan(totalCards);
+    expect(visibleCount).toBeLessThanOrEqual(totalCards);
+
+    // 过滤后，至少有一个非“自然”类别应被隐藏
+    const hiddenCard = page
+      .locator('article[data-category]')
+      .filter({ hasNotText: '自然' })
+      .first();
+    await expect(hiddenCard).toBeHidden();
   });
 
   test('探索页 - 图片懒加载属性', async ({ page }) => {
@@ -95,7 +103,7 @@ test.describe('Global Frame - 自动化测试', () => {
     await page.goto(`${BASE_URL}/collections`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     await expect(page.locator('h1')).toContainText('精选专辑', { timeout: 5000 });
-    await expect(page.locator('a[href*="discovery"]')).toHaveCount(6, { timeout: 5000 }); // Navbar探索 + 4个专辑卡片 + 可能的额外链接
+    await expect(page.locator('a[href*="discovery"]')).toHaveCount(7, { timeout: 5000 });
   });
 
   test('上传页 - 加载正常', async ({ page }) => {
@@ -143,6 +151,7 @@ test.describe('Global Frame - 自动化测试', () => {
 
   test('上传页 - 编辑元数据后同步到探索页并可在查看器看到信息区', async ({ page }) => {
     await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+    await page.evaluate(() => localStorage.removeItem('gf-discovery-media'));
 
     const jpgBuffer = Buffer.from([
       0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46,
@@ -166,10 +175,10 @@ test.describe('Global Frame - 自动化测试', () => {
     await expect(page.getByTestId('upload-alert')).toContainText('已同步');
 
     await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
-    await expect(page.locator('[data-testid="gallery-card"]').first()).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('[data-testid="gallery-card"]').first()).toContainText('第三轮测试标题');
-    await expect(page.locator('[data-testid="gallery-card"]').first()).toContainText('上海 · 外滩');
-    await page.locator('.open-viewer-btn').first().click();
+    const syncedCard = page.locator('[data-testid="gallery-card"]', { hasText: '第三轮测试标题' }).first();
+    await expect(syncedCard).toBeVisible({ timeout: 5000 });
+    await expect(syncedCard).toContainText('上海 · 外滩');
+    await syncedCard.locator('.open-viewer-btn').click();
 
     await expect(page.getByTestId('viewer-params')).toBeVisible({ timeout: 5000 });
     await expect(page.getByTestId('viewer-device')).toBeVisible();
@@ -203,6 +212,18 @@ test.describe('Global Frame - 自动化测试', () => {
 
     const notesLink = page.locator('nav').getByRole('link', { name: '笔记' });
     await expect(notesLink).toHaveClass(/blue-/);
+  });
+
+  test('导航 - 全局搜索可跳转到笔记检索', async ({ page }) => {
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    await page.locator('#open-search-btn').click();
+    await expect(page.locator('#global-search-modal')).toBeVisible();
+    await page.locator('#global-search-input').fill('TypeScript');
+    await page.locator('#global-search-form').locator('button[type="submit"]').click();
+
+    await expect(page).toHaveURL(/\/notes\?q=TypeScript/);
+    await expect(page.locator('#note-search')).toHaveValue('TypeScript');
   });
 
   test('笔记 - 列表可见并可进入详情', async ({ page }) => {

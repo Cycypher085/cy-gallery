@@ -311,8 +311,8 @@ const categoriesJson = JSON.stringify(categories);
   }
 
   function syncViewerData() {
-    if (typeof window.setPhotoViewerData === 'function') {
-      window.setPhotoViewerData(photos);
+    if (typeof window.setPhotoViewerPhotos === 'function') {
+      window.setPhotoViewerPhotos(photos);
     }
   }
 
@@ -389,7 +389,7 @@ const categoriesJson = JSON.stringify(categories);
     document.querySelectorAll('[data-category]').forEach((card) => {
       const el = card;
       const category = el.dataset.category ?? '';
-      if (filter === '全部' || category === filter) {
+      if (filter === '全部' || category.split('|').includes(filter)) {
         el.style.display = '';
         el.style.animation = 'fadeSlideUp 0.3s ease-out';
       } else {
@@ -403,22 +403,32 @@ const categoriesJson = JSON.stringify(categories);
   });
 
   let mapInitialized = false;
+  let map = null;
   function initMap() {
-    if (mapInitialized) return;
+    if (mapInitialized && map) {
+      map.invalidateSize();
+      return;
+    }
     const mapContainer = document.getElementById('discovery-map');
     if (!mapContainer) return;
-    if (typeof L === 'undefined') {
-      console.warn('Leaflet not loaded');
+
+    const leaflet = window.L;
+    if (!leaflet) {
+      console.warn('Leaflet runtime is unavailable.');
       return;
     }
 
-    const map = L.map('discovery-map', {
+    const isDark = document.documentElement.classList.contains('dark');
+    map = leaflet.map('discovery-map', {
       center: [20, 0],
       zoom: 2,
       attributionControl: false,
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    const tileUrl = isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    leaflet.tileLayer(tileUrl, {
       subdomains: 'abcd',
       maxZoom: 19,
     }).addTo(map);
@@ -427,7 +437,7 @@ const categoriesJson = JSON.stringify(categories);
       const lat = Number(photo.meta?.lat);
       const lng = Number(photo.meta?.lng);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-      const marker = L.marker([lat, lng]).addTo(map);
+      const marker = leaflet.marker([lat, lng]).addTo(map);
       const popupContent = `
         <div style="min-width: 200px;">
           <img src="${escapeHtml(photo.thumbnail || photo.url)}" alt="${escapeHtml(photo.title)}" style="width: 100%; border-radius: 8px; margin-bottom: 8px;" />

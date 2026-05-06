@@ -90,6 +90,8 @@ const recentNotes = notes.slice(0, 5);
               <article 
                 class="note-card group glass-card rounded-2xl overflow-hidden transition-all duration-500 hover:border-blue-500/50 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] hover:-translate-y-1"
                 data-tags={JSON.stringify(note.data.tags)}
+                data-title={note.data.title}
+                data-description={note.data.description ?? ''}
               >
                 {note.data.cover && (
                   <div class="aspect-video overflow-hidden">
@@ -163,7 +165,18 @@ const recentNotes = notes.slice(0, 5);
   const searchInput = document.getElementById('note-search') as HTMLInputElement;
   const notesGrid = document.getElementById('notes-grid');
   const noResults = document.getElementById('no-results');
-  const noteCards = document.querySelectorAll('.note-card');
+  const noteCards = document.querySelectorAll<HTMLElement>('.note-card');
+  const tagButtons = document.querySelectorAll<HTMLElement>('.tag-filter');
+
+  function setActiveTagByName(tagName?: string | null) {
+    tagButtons.forEach((button) => {
+      const isActive = !!tagName && button.dataset.tag === tagName;
+      button.classList.toggle('bg-blue-500/30', isActive);
+      button.classList.toggle('text-blue-400', isActive);
+      button.classList.toggle('bg-white/5', !isActive);
+      button.classList.toggle('text-white/60', !isActive);
+    });
+  }
   
   function filterNotes() {
     const query = searchInput?.value.toLowerCase() || '';
@@ -171,11 +184,10 @@ const recentNotes = notes.slice(0, 5);
     
     let visibleCount = 0;
     
-    noteCards.forEach(card => {
-      const el = card as HTMLElement;
+    noteCards.forEach((el) => {
       const tags = JSON.parse(el.dataset.tags || '[]');
-      const title = el.querySelector('h2')?.textContent?.toLowerCase() || '';
-      const description = el.querySelector('p')?.textContent?.toLowerCase() || '';
+      const title = (el.dataset.title || '').toLowerCase();
+      const description = (el.dataset.description || '').toLowerCase();
       
       const matchesSearch = !query || title.includes(query) || description.includes(query);
       const matchesTag = !activeTag || tags.includes(activeTag);
@@ -197,25 +209,28 @@ const recentNotes = notes.slice(0, 5);
   searchInput?.addEventListener('input', filterNotes);
   
   // Tag filter
-  document.querySelectorAll('.tag-filter').forEach(btn => {
+  tagButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const el = btn as HTMLElement;
-      const isActive = el.classList.contains('bg-blue-500/30');
+      const isActive = btn.classList.contains('bg-blue-500/30');
       
-      // Toggle active state
-      document.querySelectorAll('.tag-filter').forEach(b => {
-        b.classList.remove('bg-blue-500/30', 'text-blue-400');
-        b.classList.add('bg-white/5', 'text-white/60');
-      });
-      
-      if (!isActive) {
-        el.classList.add('bg-blue-500/30', 'text-blue-400');
-        el.classList.remove('bg-white/5', 'text-white/60');
-      }
-      
+      setActiveTagByName(isActive ? null : btn.dataset.tag);
       filterNotes();
     });
   });
+
+  // URL query hydration: supports ?q=keyword and ?tag=标签
+  (function hydrateQueryState() {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    const tag = params.get('tag');
+    if (q && searchInput) {
+      searchInput.value = q;
+    }
+    if (tag) {
+      setActiveTagByName(tag);
+    }
+    filterNotes();
+  })();
 </script>
 
 <style>

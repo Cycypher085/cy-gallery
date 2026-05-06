@@ -45,7 +45,11 @@ function isNavActive(href: string): boolean {
     <!-- Right Actions -->
     <div class="flex items-center gap-2">
       <!-- Search Button -->
-      <button class="p-2 hover:bg-white/10 dark:hover:bg-white/10 rounded-full transition-colors" aria-label="Search">
+      <button
+        id="open-search-btn"
+        class="p-2 rounded-full transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+        aria-label="Search"
+      >
         <span class="material-symbols-outlined text-xl">search</span>
       </button>
       
@@ -80,7 +84,11 @@ function isNavActive(href: string): boolean {
   </div>
 
   <!-- Mobile Menu -->
-  <div id="mobile-menu" class="md:hidden hidden absolute top-full left-0 right-0 bg-[#0A0A0F]/95 dark:bg-[#0A0A0F]/95 backdrop-blur-lg border-b border-white/10">
+  <div
+    id="mobile-menu"
+    class="md:hidden hidden absolute top-full left-0 right-0 backdrop-blur-lg border-b border-default"
+    style="background: color-mix(in srgb, var(--color-bg-surface) 92%, transparent);"
+  >
     <div class="px-6 py-4 space-y-3">
       {navItems.map(item => (
         <a 
@@ -106,6 +114,49 @@ function isNavActive(href: string): boolean {
   </div>
 </nav>
 
+<div
+  id="global-search-modal"
+  class="fixed inset-0 z-[70] hidden items-start justify-center bg-black/50 px-4 pt-20 md:pt-24"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="global-search-title"
+>
+  <div class="w-full max-w-2xl rounded-3xl border border-default bg-surface p-5 shadow-2xl md:p-6">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <p id="global-search-title" class="text-base font-semibold">全局搜索</p>
+        <p class="text-xs text-secondary">输入关键词并回车，快速跳转到笔记列表检索。</p>
+      </div>
+      <button
+        id="close-search-btn"
+        class="rounded-full p-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+        aria-label="Close search"
+      >
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <form id="global-search-form" class="mt-4 flex gap-2">
+      <input
+        id="global-search-input"
+        class="w-full rounded-2xl border border-default bg-transparent px-4 py-3 text-sm outline-none transition focus:border-blue-400"
+        type="search"
+        placeholder="例如：构图 / 镜头 / 日常"
+        autocomplete="off"
+      />
+      <button class="rounded-2xl bg-blue-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-600" type="submit">
+        搜索
+      </button>
+    </form>
+
+    <div class="mt-4 grid gap-2 sm:grid-cols-3">
+      <a class="rounded-2xl border border-default px-4 py-3 text-sm transition hover:border-blue-400 hover:text-blue-500" href="/discovery">前往探索页</a>
+      <a class="rounded-2xl border border-default px-4 py-3 text-sm transition hover:border-blue-400 hover:text-blue-500" href="/upload">前往上传页</a>
+      <a class="rounded-2xl border border-default px-4 py-3 text-sm transition hover:border-blue-400 hover:text-blue-500" href="/notes">前往笔记页</a>
+    </div>
+  </div>
+</div>
+
 <script is:inline>
   // Theme icon update
   function updateThemeIcons() {
@@ -125,7 +176,7 @@ function isNavActive(href: string): boolean {
   
   // Watch for changes
   const observer = new MutationObserver(updateThemeIcons);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
 
   // Mobile menu toggle
   window.toggleMobileMenu = function() {
@@ -139,21 +190,69 @@ function isNavActive(href: string): boolean {
     closeIcon.classList.toggle('hidden');
   };
 
+  // Global search modal
+  (function () {
+    const modal = document.getElementById('global-search-modal');
+    const openBtn = document.getElementById('open-search-btn');
+    const closeBtn = document.getElementById('close-search-btn');
+    const form = document.getElementById('global-search-form');
+    const input = document.getElementById('global-search-input');
+
+    if (!modal || !openBtn || !closeBtn || !form || !input) {
+      return;
+    }
+
+    const openModal = () => {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+      input.focus();
+    };
+
+    const closeModal = () => {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    };
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && modal.classList.contains('flex')) {
+        closeModal();
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        openModal();
+      }
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const rawQuery = input.value.trim();
+      const url = rawQuery ? `/notes?q=${encodeURIComponent(rawQuery)}` : '/notes';
+      window.location.href = url;
+    });
+  })();
+
   // Navbar scroll effect
   (function() {
     const navbar = document.getElementById('navbar');
-    let lastScroll = 0;
     
     function updateNavbar() {
       const scrollY = window.scrollY;
       
       if (scrollY > 50) {
-        navbar.classList.add('bg-[#0A0A0F]/80', 'dark:bg-[#0A0A0F]/80', 'backdrop-blur-lg', 'border-b', 'border-white/5');
+        navbar.classList.add('is-scrolled');
       } else {
-        navbar.classList.remove('bg-[#0A0A0F]/80', 'dark:bg-[#0A0A0F]/80', 'backdrop-blur-lg', 'border-b', 'border-white/5');
+        navbar.classList.remove('is-scrolled');
       }
-      
-      lastScroll = scrollY;
     }
     
     window.addEventListener('scroll', updateNavbar, { passive: true });
@@ -174,5 +273,11 @@ function isNavActive(href: string): boolean {
   
   #mobile-menu:not(.hidden) {
     opacity: 1;
+  }
+
+  #navbar.is-scrolled {
+    border-bottom: 1px solid var(--color-border);
+    backdrop-filter: blur(16px);
+    background: color-mix(in srgb, var(--color-bg-primary) 82%, transparent);
   }
 </style>
