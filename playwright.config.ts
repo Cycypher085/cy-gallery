@@ -17,7 +17,7 @@ export default defineConfig({
   use: {
     baseURL: process.env.PREVIEW_URL || 'http://localhost:4321',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    screenshot: 'on',
     navigationTimeout: process.env.CI ? 30000 : 15000, // Increase navigation timeout for CI
   },
   projects: [

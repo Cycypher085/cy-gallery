@@ -7,7 +7,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "deploy:cloudflare": "wrangler versions upload",
     "test:e2e": "playwright test",
+    "test:e2e:with-screenshots": "playwright test && node scripts/list-playwright-screenshots.mjs",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed"
   },
