@@ -14,12 +14,12 @@ const categoriesJson = JSON.stringify(categories);
   <Navbar />
   <PhotoViewer photos={photos} />
   
-  <main class="pt-28 pb-24 px-6 min-h-screen bg-[#0A0A0F]">
+  <main class="pt-28 pb-24 px-6 min-h-screen bg-secondary text-primary">
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-display font-bold text-white mb-4">发现精彩作品</h1>
-        <p class="text-white/60 max-w-2xl mx-auto">
+        <h1 class="text-4xl font-display font-bold text-primary mb-4">发现精彩作品</h1>
+        <p class="text-secondary max-w-2xl mx-auto">
           探索全球摄影师的精彩作品，每一张照片都有一个故事
         </p>
       </div>
@@ -33,8 +33,8 @@ const categoriesJson = JSON.stringify(categories);
               class:list={[
                 "px-4 py-2 rounded-full text-sm font-medium transition-all",
                 i === 0 
-                  ? "bg-blue-500 text-white" 
-                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+                  ? "bg-blue-500 text-white border border-blue-500" 
+                  : "chip-neutral"
               ]}
               data-filter={cat}
             >
@@ -44,23 +44,23 @@ const categoriesJson = JSON.stringify(categories);
         </div>
         
         <!-- View Toggle -->
-        <div class="flex items-center gap-1 bg-white/5 rounded-full p-1" id="view-toggle">
+        <div class="flex items-center gap-1 rounded-full p-1 chip-neutral" id="view-toggle">
           <button 
-            class="view-btn p-2 rounded-full bg-white/10 text-white transition-all" 
+            class="view-btn p-2 rounded-full bg-blue-500 text-white transition-all" 
             data-view="grid"
             aria-label="Grid view"
           >
             <span class="material-symbols-outlined text-xl">grid_view</span>
           </button>
           <button 
-            class="view-btn p-2 rounded-full text-white/50 hover:bg-white/10 transition-all" 
+            class="view-btn p-2 rounded-full text-secondary hover:bg-black/5 dark:hover:bg-white/10 transition-all" 
             data-view="timeline"
             aria-label="Timeline view"
           >
             <span class="material-symbols-outlined text-xl">view_timeline</span>
           </button>
           <button 
-            class="view-btn p-2 rounded-full text-white/50 hover:bg-white/10 transition-all" 
+            class="view-btn p-2 rounded-full text-secondary hover:bg-black/5 dark:hover:bg-white/10 transition-all" 
             data-view="map"
             aria-label="Map view"
           >
@@ -107,23 +107,23 @@ const categoriesJson = JSON.stringify(categories);
                 </div>
               </div>
               <div class="p-5">
-                <h3 class="text-white font-medium text-lg mb-2">{photo.title}</h3>
+                <h3 class="text-primary font-medium text-lg mb-2">{photo.title}</h3>
                 <div class="flex items-center justify-between">
-                  <p class="text-white/50 text-sm flex items-center gap-1">
+                  <p class="text-secondary text-sm flex items-center gap-1">
                     <span class="material-symbols-outlined text-sm">person</span>
                     {photo.photographer}
                   </p>
-                  <p class="text-white/50 text-sm flex items-center gap-1">
+                  <p class="text-secondary text-sm flex items-center gap-1">
                     <span class="material-symbols-outlined text-sm">calendar_today</span>
                     {photo.meta.capturedAt ? new Date(photo.meta.capturedAt).toLocaleDateString('zh-CN') : '--'}
                   </p>
                   <div class="flex gap-1">
                     {photo.tags.slice(0, 2).map(tag => (
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/60">{tag}</span>
+                      <span class="text-xs px-2 py-0.5 rounded-full chip-neutral">{tag}</span>
                     ))}
                   </div>
                 </div>
-                <div class="mt-2 text-xs text-white/45 flex items-center gap-1">
+                <div class="mt-2 text-xs text-muted flex items-center gap-1">
                   <span class="material-symbols-outlined text-sm">photo_camera</span>
                   {[photo.meta.cameraMake, photo.meta.cameraModel].filter(Boolean).join(' ') || '--'}
                 </div>
@@ -143,15 +143,15 @@ const categoriesJson = JSON.stringify(categories);
                   {month}
                 </span>
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pl-8 border-l border-white/10">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pl-8 border-l border-default">
                 {photos.filter((_, i) => i % 4 === mi % 3).map(photo => (
                   <article class="group glass-card rounded-2xl overflow-hidden cursor-pointer transition-all hover:border-blue-500/50">
                     <div class="aspect-[4/3] overflow-hidden relative">
                       <img src={photo.thumbnail} alt={photo.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
                     <div class="p-4">
-                      <h3 class="text-white font-medium">{photo.title}</h3>
-                      <p class="text-white/50 text-sm">{photo.location}</p>
+                      <h3 class="text-primary font-medium">{photo.title}</h3>
+                      <p class="text-secondary text-sm">{photo.location}</p>
                     </div>
                   </article>
                 ))}
@@ -163,13 +163,13 @@ const categoriesJson = JSON.stringify(categories);
       
       <!-- Map View (Hidden by default) -->
       <div id="view-map" class="view-content hidden">
-        <div id="discovery-map" class="h-[600px] rounded-2xl overflow-hidden border border-white/10"></div>
-        <p class="text-center text-white/40 mt-4 text-sm">点击地图上的标记查看照片</p>
+        <div id="discovery-map" class="h-[600px] rounded-2xl overflow-hidden border border-default"></div>
+        <p class="text-center text-muted mt-4 text-sm">点击地图上的标记查看照片</p>
       </div>
 
       <!-- Load More -->
       <div class="text-center mt-12">
-        <button class="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-full font-medium transition-colors inline-flex items-center gap-2" id="load-more-btn">
+        <button class="chip-neutral text-primary px-8 py-3 rounded-full font-medium transition-colors inline-flex items-center gap-2" id="load-more-btn">
           <span class="material-symbols-outlined">refresh</span>
           加载更多
         </button>
@@ -177,8 +177,8 @@ const categoriesJson = JSON.stringify(categories);
     </div>
   </main>
   
-  <footer class="bg-black/50 backdrop-blur-sm border-t border-white/10 py-8 px-6">
-    <div class="max-w-7xl mx-auto text-center text-white/40 text-sm">
+  <footer class="site-footer py-8 px-6">
+    <div class="max-w-7xl mx-auto text-center text-muted text-sm">
       © 2026 Global Frame. All rights reserved.
     </div>
   </footer>
@@ -219,8 +219,7 @@ const categoriesJson = JSON.stringify(categories);
     if (!filterBar || categories.includes(category)) return;
     categories.push(category);
     const filterButton = document.createElement('button');
-    filterButton.className =
-      'px-4 py-2 rounded-full text-sm font-medium transition-all bg-white/10 text-white/70 hover:bg-white/20 hover:text-white';
+    filterButton.className = 'chip-neutral px-4 py-2 rounded-full text-sm font-medium transition-all';
     filterButton.dataset.filter = category;
     filterButton.textContent = category;
     filterBar.appendChild(filterButton);
@@ -287,19 +286,19 @@ const categoriesJson = JSON.stringify(categories);
               </div>
             </div>
             <div class="p-5">
-              <h3 class="text-white font-medium text-lg mb-2">${escapeHtml(photo.title)}</h3>
+              <h3 class="text-primary font-medium text-lg mb-2">${escapeHtml(photo.title)}</h3>
               <div class="flex items-center justify-between">
-                <p class="text-white/50 text-sm flex items-center gap-1">
+                <p class="text-secondary text-sm flex items-center gap-1">
                   <span class="material-symbols-outlined text-sm">person</span>
                   ${escapeHtml(photo.photographer)}
                 </p>
-                <p class="text-white/50 text-sm flex items-center gap-1">
+                <p class="text-secondary text-sm flex items-center gap-1">
                   <span class="material-symbols-outlined text-sm">calendar_today</span>
                   ${dateLabel}
                 </p>
                 <div class="flex gap-1">${tags}</div>
               </div>
-              <div class="mt-2 text-xs text-white/45 flex items-center gap-1">
+              <div class="mt-2 text-xs text-muted flex items-center gap-1">
                 <span class="material-symbols-outlined text-sm">photo_camera</span>
                 ${escapeHtml(cameraLabel)}
               </div>
@@ -331,11 +330,11 @@ const categoriesJson = JSON.stringify(categories);
     const view = btn.dataset.view;
     viewToggle.querySelectorAll('.view-btn').forEach((b) => {
       if (b === btn) {
-        b.classList.add('bg-white/10', 'text-white');
-        b.classList.remove('text-white/50');
+        b.classList.add('bg-blue-500', 'text-white');
+        b.classList.remove('text-secondary');
       } else {
-        b.classList.remove('bg-white/10', 'text-white');
-        b.classList.add('text-white/50');
+        b.classList.remove('bg-blue-500', 'text-white');
+        b.classList.add('text-secondary');
       }
     });
 
@@ -378,11 +377,11 @@ const categoriesJson = JSON.stringify(categories);
     const filter = btn.dataset.filter;
     filterBar.querySelectorAll('[data-filter]').forEach((b) => {
       if (b === btn) {
-        b.classList.add('bg-blue-500', 'text-white');
-        b.classList.remove('bg-white/10', 'text-white/70', 'hover:bg-white/20', 'hover:text-white');
+        b.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+        b.classList.remove('chip-neutral');
       } else {
-        b.classList.remove('bg-blue-500', 'text-white');
-        b.classList.add('bg-white/10', 'text-white/70', 'hover:bg-white/20', 'hover:text-white');
+        b.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+        b.classList.add('chip-neutral');
       }
     });
 
@@ -462,11 +461,5 @@ const categoriesJson = JSON.stringify(categories);
   @keyframes fadeSlideUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
-  }
-  
-  .glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 </style>

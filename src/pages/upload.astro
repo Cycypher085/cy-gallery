@@ -6,12 +6,12 @@ import Navbar from '../components/Navbar.astro';
 <Layout title="上传作品 | Global Frame">
   <Navbar />
 
-  <main class="pt-28 pb-24 px-6 min-h-screen bg-background-dark">
+  <main class="pt-28 pb-24 px-6 min-h-screen bg-secondary text-primary">
     <div class="max-w-5xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-display font-bold text-white mb-4">上传你的作品</h1>
-        <p class="text-white/60">
+        <h1 class="text-4xl font-display font-bold text-primary mb-4">上传你的作品</h1>
+        <p class="text-secondary">
           支持高清照片与视频，自动解析基础参数、拍摄设备与地理位置信息
         </p>
       </div>
@@ -20,14 +20,14 @@ import Navbar from '../components/Navbar.astro';
       <div class="glass-panel rounded-2xl p-8 mb-8">
         <div 
           id="drop-zone"
-          class="border-2 border-dashed border-white/20 rounded-xl p-10 text-center cursor-pointer hover:border-accent/50 hover:bg-white/5 transition-all"
+          class="border-2 border-dashed border-default rounded-xl p-10 text-center cursor-pointer hover:border-accent/50 hover:bg-white/5 transition-all"
           data-testid="upload-drop-zone"
         >
           <div class="mb-6">
-            <span class="material-symbols-outlined text-6xl text-white/30">cloud_upload</span>
+            <span class="material-symbols-outlined text-6xl text-muted">cloud_upload</span>
           </div>
-          <h3 class="text-xl font-medium text-white mb-2">拖拽照片或视频到此处</h3>
-          <p class="text-white/50 text-sm mb-6">支持批量选择，自动提取可用元数据</p>
+          <h3 class="text-xl font-medium text-primary mb-2">拖拽照片或视频到此处</h3>
+          <p class="text-secondary text-sm mb-6">支持批量选择，自动提取可用元数据</p>
           <input 
             type="file" 
             id="file-input" 
@@ -43,7 +43,7 @@ import Navbar from '../components/Navbar.astro';
           >
             选择媒体文件
           </button>
-          <p class="text-white/30 text-xs mt-4">
+          <p class="text-muted text-xs mt-4">
             支持 JPG、PNG、WebP、MP4、MOV（图片 ≤ 20MB，视频 ≤ 300MB）
           </p>
         </div>
@@ -53,9 +53,9 @@ import Navbar from '../components/Navbar.astro';
       <section class="glass-card rounded-2xl p-6 md:p-8 mb-8">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
-            <h2 class="text-2xl font-semibold text-white mb-1">媒体队列</h2>
-            <p class="text-white/50 text-sm">
-              当前队列：<span id="queue-count" class="text-white font-medium">0</span> 项
+            <h2 class="text-2xl font-semibold text-primary mb-1">媒体队列</h2>
+            <p class="text-secondary text-sm">
+              当前队列：<span id="queue-count" class="text-primary font-medium">0</span> 项
             </p>
           </div>
           <button
@@ -82,7 +82,7 @@ import Navbar from '../components/Navbar.astro';
 
         <div id="empty-state" class="text-center py-16 border border-white/10 rounded-2xl bg-black/20">
           <span class="material-symbols-outlined text-5xl text-white/20 mb-3">perm_media</span>
-          <p class="text-white/50">暂未添加文件，拖拽或点击上方按钮开始</p>
+          <p class="text-secondary">暂未添加文件，拖拽或点击上方按钮开始</p>
         </div>
 
         <div id="media-queue" class="hidden space-y-4" data-testid="media-queue"></div>
@@ -90,11 +90,11 @@ import Navbar from '../components/Navbar.astro';
 
       <section class="glass-card rounded-2xl p-6 md:p-8 mb-8" data-testid="saved-gallery-section">
         <div class="flex items-center justify-between gap-4 mb-4">
-          <h2 class="text-xl font-semibold text-white">已保存到画廊的数据快照</h2>
-          <p class="text-xs text-white/45">保存后会同步到发现页展示（本地浏览器）</p>
+          <h2 class="text-xl font-semibold text-primary">已保存到画廊的数据快照</h2>
+          <p class="text-xs text-muted">保存后会同步到发现页展示（本地浏览器）</p>
         </div>
         <div id="saved-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <p class="text-white/50 text-sm col-span-full">暂无已保存快照</p>
+          <p class="text-secondary text-sm col-span-full">暂无已保存快照</p>
         </div>
       </section>
 
@@ -102,45 +102,45 @@ import Navbar from '../components/Navbar.astro';
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="glass-card rounded-xl p-6 text-center">
           <span class="material-symbols-outlined text-3xl text-accent mb-3">camera</span>
-          <h4 class="text-white font-medium mb-1">拍摄参数</h4>
-          <p class="text-white/50 text-sm">自动展示分辨率、时长、ISO、光圈、快门等关键字段</p>
+          <h4 class="text-primary font-medium mb-1">拍摄参数</h4>
+          <p class="text-secondary text-sm">自动展示分辨率、时长、ISO、光圈、快门等关键字段</p>
         </div>
         <div class="glass-card rounded-xl p-6 text-center">
           <span class="material-symbols-outlined text-3xl text-accent mb-3">devices</span>
-          <h4 class="text-white font-medium mb-1">设备信息</h4>
-          <p class="text-white/50 text-sm">支持查看相机品牌、机型与镜头信息，缺失时自动兜底</p>
+          <h4 class="text-primary font-medium mb-1">设备信息</h4>
+          <p class="text-secondary text-sm">支持查看相机品牌、机型与镜头信息，缺失时自动兜底</p>
         </div>
         <div class="glass-card rounded-xl p-6 text-center">
           <span class="material-symbols-outlined text-3xl text-accent mb-3">location_on</span>
-          <h4 class="text-white font-medium mb-1">地理位置</h4>
-          <p class="text-white/50 text-sm">若媒体包含 GPS 坐标，可直接跳转地图定位查看</p>
+          <h4 class="text-primary font-medium mb-1">地理位置</h4>
+          <p class="text-secondary text-sm">若媒体包含 GPS 坐标，可直接跳转地图定位查看</p>
         </div>
       </div>
 
       <!-- FAQ -->
       <div class="mt-12">
-        <h3 class="text-xl font-medium text-white mb-6 text-center">常见问题</h3>
+        <h3 class="text-xl font-medium text-primary mb-6 text-center">常见问题</h3>
         <div class="space-y-4">
           <details class="glass-card rounded-lg p-4 group">
-            <summary class="text-white font-medium cursor-pointer flex items-center justify-between">
+            <summary class="text-primary font-medium cursor-pointer flex items-center justify-between">
               如何获得上传权限？
               <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
             </summary>
-            <p class="text-white/60 text-sm mt-3">目前采用邀请码制度，你需要先获得邀请码才能上传作品。邀请码每个只能使用一次。</p>
+            <p class="text-secondary text-sm mt-3">目前采用邀请码制度，你需要先获得邀请码才能上传作品。邀请码每个只能使用一次。</p>
           </details>
           <details class="glass-card rounded-lg p-4 group">
-            <summary class="text-white font-medium cursor-pointer flex items-center justify-between">
+            <summary class="text-primary font-medium cursor-pointer flex items-center justify-between">
               支持哪些格式？
               <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
             </summary>
-            <p class="text-white/60 text-sm mt-3">支持 JPG、PNG、WebP、MP4、MOV。建议使用高质量素材以获得最佳展示效果。</p>
+            <p class="text-secondary text-sm mt-3">支持 JPG、PNG、WebP、MP4、MOV。建议使用高质量素材以获得最佳展示效果。</p>
           </details>
           <details class="glass-card rounded-lg p-4 group">
-            <summary class="text-white font-medium cursor-pointer flex items-center justify-between">
+            <summary class="text-primary font-medium cursor-pointer flex items-center justify-between">
               我的照片会被如何使用？
               <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
             </summary>
-            <p class="text-white/60 text-sm mt-3">你的照片仅用于在 Global Frame 平台上展示，我们不会将其用于其他用途。</p>
+            <p class="text-secondary text-sm mt-3">你的照片仅用于在 Global Frame 平台上展示，我们不会将其用于其他用途。</p>
           </details>
         </div>
       </div>

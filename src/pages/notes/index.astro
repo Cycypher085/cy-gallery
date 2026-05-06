@@ -16,7 +16,7 @@ const recentNotes = notes.slice(0, 5);
 <Layout title="学习笔记 | Global Frame">
   <Navbar />
   
-  <main class="pt-28 pb-24 px-6 min-h-screen bg-[#0A0A0F]">
+  <main class="pt-28 pb-24 px-6 min-h-screen bg-secondary text-primary">
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col lg:flex-row gap-8">
         
@@ -26,18 +26,18 @@ const recentNotes = notes.slice(0, 5);
             
             <!-- Search -->
             <div class="relative">
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40">search</span>
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted">search</span>
               <input 
                 type="text" 
                 id="note-search"
                 placeholder="搜索笔记..."
-                class="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-white/40 focus:outline-none focus:border-blue-500/50 transition-colors"
+                class="input-surface w-full py-3 pl-12 pr-4 transition-colors"
               />
             </div>
             
             <!-- Navigation -->
             <div class="space-y-2">
-              <h3 class="text-xs font-medium text-white/40 uppercase tracking-wider px-4">导航</h3>
+              <h3 class="text-xs font-medium text-muted uppercase tracking-wider px-4">导航</h3>
               <a href="/notes" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-blue-500/20 text-blue-400">
                 <span class="material-symbols-outlined text-xl">article</span>
                 全部笔记
@@ -46,11 +46,11 @@ const recentNotes = notes.slice(0, 5);
             
             <!-- Tags -->
             <div class="space-y-2">
-              <h3 class="text-xs font-medium text-white/40 uppercase tracking-wider px-4">标签云</h3>
+              <h3 class="text-xs font-medium text-muted uppercase tracking-wider px-4">标签云</h3>
               <div class="flex flex-wrap gap-2 px-4">
                 {allTags.map(tag => (
                   <button 
-                    class="tag-filter text-xs px-3 py-1.5 rounded-full bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+                    class="tag-filter chip-neutral text-xs px-3 py-1.5 rounded-full transition-colors"
                     data-tag={tag}
                   >
                     {tag}
@@ -61,12 +61,12 @@ const recentNotes = notes.slice(0, 5);
             
             <!-- Recent -->
             <div class="space-y-2">
-              <h3 class="text-xs font-medium text-white/40 uppercase tracking-wider px-4">最近更新</h3>
+              <h3 class="text-xs font-medium text-muted uppercase tracking-wider px-4">最近更新</h3>
               <div class="space-y-1">
                 {recentNotes.map(note => (
                   <a 
                     href={`/notes/${note.id}`}
-                    class="block px-4 py-2 rounded-lg hover:bg-white/5 text-white/70 hover:text-white transition-colors text-sm truncate"
+                    class="block px-4 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-secondary hover:text-primary transition-colors text-sm truncate"
                   >
                     {note.data.title}
                   </a>
@@ -80,8 +80,8 @@ const recentNotes = notes.slice(0, 5);
         <div class="flex-1 min-w-0">
           <!-- Header -->
           <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white mb-2">学习笔记</h1>
-            <p class="text-white/60">记录学习心得，分享技术见解</p>
+            <h1 class="text-3xl font-bold text-primary mb-2">学习笔记</h1>
+            <p class="text-secondary">记录学习心得，分享技术见解</p>
           </div>
           
           <!-- Notes Grid -->
@@ -112,7 +112,7 @@ const recentNotes = notes.slice(0, 5);
                   </div>
                   
                   <!-- Title -->
-                  <h2 class="text-xl font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  <h2 class="text-xl font-semibold text-primary mb-2 group-hover:text-blue-400 transition-colors">
                     <a href={`/notes/${note.id}`}>
                       {note.data.title}
                     </a>
@@ -120,13 +120,13 @@ const recentNotes = notes.slice(0, 5);
                   
                   <!-- Description -->
                   {note.data.description && (
-                    <p class="text-white/50 text-sm mb-4 line-clamp-2">
+                    <p class="text-secondary text-sm mb-4 line-clamp-2">
                       {note.data.description}
                     </p>
                   )}
                   
                   <!-- Meta -->
-                  <div class="flex items-center gap-4 text-white/40 text-sm">
+                  <div class="flex items-center gap-4 text-muted text-sm">
                     <span class="flex items-center gap-1">
                       <span class="material-symbols-outlined text-sm">calendar_today</span>
                       {note.data.date.toLocaleDateString('zh-CN')}
@@ -145,16 +145,16 @@ const recentNotes = notes.slice(0, 5);
           
           <!-- Empty state -->
           <div id="no-results" class="hidden text-center py-16">
-            <span class="material-symbols-outlined text-6xl text-white/20 mb-4">search_off</span>
-            <p class="text-white/50">没有找到匹配的笔记</p>
+            <span class="material-symbols-outlined text-6xl text-muted mb-4">search_off</span>
+            <p class="text-secondary">没有找到匹配的笔记</p>
           </div>
         </div>
       </div>
     </div>
   </main>
   
-  <footer class="bg-black/50 backdrop-blur-sm border-t border-white/10 py-8 px-6">
-    <div class="max-w-7xl mx-auto text-center text-white/40 text-sm">
+  <footer class="site-footer py-8 px-6">
+    <div class="max-w-7xl mx-auto text-center text-muted text-sm">
       © 2026 Global Frame. All rights reserved.
     </div>
   </footer>
@@ -171,16 +171,15 @@ const recentNotes = notes.slice(0, 5);
   function setActiveTagByName(tagName?: string | null) {
     tagButtons.forEach((button) => {
       const isActive = !!tagName && button.dataset.tag === tagName;
-      button.classList.toggle('bg-blue-500/30', isActive);
+      button.classList.toggle('bg-blue-500/20', isActive);
       button.classList.toggle('text-blue-400', isActive);
-      button.classList.toggle('bg-white/5', !isActive);
-      button.classList.toggle('text-white/60', !isActive);
+      button.classList.toggle('chip-neutral', !isActive);
     });
   }
   
   function filterNotes() {
     const query = searchInput?.value.toLowerCase() || '';
-    const activeTag = document.querySelector('.tag-filter.bg-blue-500/30')?.getAttribute('data-tag');
+    const activeTag = document.querySelector('.tag-filter.bg-blue-500/20')?.getAttribute('data-tag');
     
     let visibleCount = 0;
     
@@ -211,7 +210,7 @@ const recentNotes = notes.slice(0, 5);
   // Tag filter
   tagButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const isActive = btn.classList.contains('bg-blue-500/30');
+      const isActive = btn.classList.contains('bg-blue-500/20');
       
       setActiveTagByName(isActive ? null : btn.dataset.tag);
       filterNotes();
@@ -234,12 +233,6 @@ const recentNotes = notes.slice(0, 5);
 </script>
 
 <style>
-  .glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;

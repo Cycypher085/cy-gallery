@@ -37,12 +37,12 @@ const collections = [
 <Layout title="专辑 | Global Frame">
   <Navbar />
 
-  <main class="pt-28 pb-24 px-6 min-h-screen bg-[#0F0F0F]">
+  <main class="pt-28 pb-24 px-6 min-h-screen bg-secondary text-primary">
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-white mb-4">精选专辑</h1>
-        <p class="text-white/60 max-w-2xl mx-auto">
+        <h1 class="text-4xl font-bold text-primary mb-4">精选专辑</h1>
+        <p class="text-secondary max-w-2xl mx-auto">
           按主题分类的摄影作品集，发现不同维度的世界之美
         </p>
       </div>
@@ -50,7 +50,7 @@ const collections = [
       <!-- Collections Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {collections.map(collection => (
-          <a href="/discovery" class="group bg-white/5 hover:bg-white/10 backdrop-blur-lg border border-white/10 hover:border-white/30 rounded-xl overflow-hidden transition-all duration-500">
+          <a href="/discovery" class="group glass-card rounded-xl overflow-hidden transition-all duration-500">
             <div class="aspect-[4/3] overflow-hidden">
               <img 
                 src={collection.cover} 
@@ -59,8 +59,8 @@ const collections = [
               />
             </div>
             <div class="p-5">
-              <h3 class="text-white font-medium text-lg mb-1">{collection.name}</h3>
-              <p class="text-white/50 text-sm mb-2">{collection.description}</p>
+              <h3 class="text-primary font-medium text-lg mb-1">{collection.name}</h3>
+              <p class="text-secondary text-sm mb-2">{collection.description}</p>
               <p class="text-blue-400 text-sm">{collection.count} 张照片</p>
             </div>
           </a>
@@ -69,9 +69,9 @@ const collections = [
 
       <!-- Coming Soon -->
       <div class="mt-16 text-center">
-        <div class="inline-block bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl px-8 py-6">
-          <p class="text-white/60 mb-2">更多专辑即将上线</p>
-          <p class="text-white/40 text-sm">关注我们，获取最新更新</p>
+        <div class="inline-block glass-card rounded-xl px-8 py-6">
+          <p class="text-secondary mb-2">更多专辑即将上线</p>
+          <p class="text-muted text-sm">关注我们，获取最新更新</p>
         </div>
       </div>
     </div>

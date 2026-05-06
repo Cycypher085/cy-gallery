@@ -62,3 +62,14 @@
 - 测试结果：`npm run build` Pass；`npm run test:e2e:with-screenshots` 16/16 Pass。
 - 后续注意事项：当前多页面仍使用部分固定深色类名，后续若继续推进完整主题化，建议分批替换 `text-white/*` 与 `bg-[#0F0F0F]` 为 design-token 类，避免一次性大改引入视觉回归。
 
+### [2026-05-06] 视觉一致性收口：主题 token 扩展与页面基线统一
+- 背景：在 P0 交互稳定后，继续执行“全站视觉一致性收口”，降低 light/dark 下页面风格割裂与硬编码颜色回归风险。
+- 主要改动：
+  - `global.css` 新增可复用主题组件类：`site-footer`、`chip-neutral`、`input-surface`，用于页脚、筛选 chip、输入框等跨页面统一。
+  - `collections.astro`、`notes/index.astro`、`notes/[slug].astro`、`discovery.astro`、`index.astro`、`upload.astro` 统一主容器与关键文案到 `bg-secondary` / `text-primary` / `text-secondary` / `text-muted`。
+  - 去除页面内重复且偏暗色的局部 `.glass-card` 覆盖，回归全局 token 驱动的玻璃卡片样式。
+  - Discovery 的动态渲染模板与筛选按钮逻辑同步到 token 化类名，避免“初始样式与脚本重渲染后样式不一致”。
+- 为什么这样实现：先抽公共样式原子，再做页面替换，可在不大幅改动组件结构的前提下提升一致性，并降低后续迭代维护成本。
+- 测试结果：`npm run build` Pass；`npm run test:e2e:with-screenshots` 16/16 Pass。
+- 后续注意事项：上传页队列的动态 HTML 仍包含部分历史 `text-white/*` 类，可在下一轮单独做“上传工作台深度 token 化”。
+

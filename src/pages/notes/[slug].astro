@@ -29,12 +29,12 @@ const relatedNotes = allNotes
 <Layout title={`${note.data.title} | Global Frame`} description={note.data.description}>
   <Navbar />
   
-  <main class="pt-28 pb-24 px-6 min-h-screen bg-[#0A0A0F]">
+  <main class="pt-28 pb-24 px-6 min-h-screen bg-secondary text-primary">
     <article class="max-w-3xl mx-auto">
       <!-- Back button -->
       <a 
         href="/notes" 
-        class="inline-flex items-center gap-2 text-white/50 hover:text-white mb-8 transition-colors"
+        class="inline-flex items-center gap-2 text-secondary hover:text-primary mb-8 transition-colors"
       >
         <span class="material-symbols-outlined">arrow_back</span>
         所有笔记
@@ -42,7 +42,7 @@ const relatedNotes = allNotes
       
       <!-- Cover image -->
       {note.data.cover && (
-        <div class="aspect-video rounded-2xl overflow-hidden mb-8 border border-white/10">
+        <div class="aspect-video rounded-2xl overflow-hidden mb-8 border border-default">
           <img 
             src={note.data.cover} 
             alt={note.data.title}
@@ -66,12 +66,12 @@ const relatedNotes = allNotes
         </div>
         
         <!-- Title -->
-        <h1 class="text-4xl font-bold text-white mb-4 leading-tight">
+        <h1 class="text-4xl font-bold text-primary mb-4 leading-tight">
           {note.data.title}
         </h1>
         
         <!-- Meta -->
-        <div class="flex flex-wrap items-center gap-4 text-white/50 text-sm">
+        <div class="flex flex-wrap items-center gap-4 text-secondary text-sm">
           <span class="flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">calendar_today</span>
             {note.data.date.toLocaleDateString('zh-CN', { 
@@ -95,12 +95,12 @@ const relatedNotes = allNotes
       </div>
       
       <!-- Divider -->
-      <hr class="border-white/10 my-12" />
+      <hr class="border-default my-12" />
       
       <!-- Related Notes -->
       {relatedNotes.length > 0 && (
         <section>
-          <h2 class="text-xl font-semibold text-white mb-6">相关笔记</h2>
+          <h2 class="text-xl font-semibold text-primary mb-6">相关笔记</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             {relatedNotes.map(related => (
               <a 
@@ -118,10 +118,10 @@ const relatedNotes = allNotes
                   </div>
                 )}
                 <div class="p-4">
-                  <h3 class="text-white font-medium truncate mb-1">
+                  <h3 class="text-primary font-medium truncate mb-1">
                     {related.data.title}
                   </h3>
-                  <p class="text-white/40 text-sm">
+                  <p class="text-muted text-sm">
                     {related.data.date.toLocaleDateString('zh-CN')}
                   </p>
                 </div>
@@ -132,17 +132,17 @@ const relatedNotes = allNotes
       )}
       
       <!-- Share -->
-      <div class="flex items-center justify-center gap-4 mt-12 pt-8 border-t border-white/10">
-        <span class="text-white/40 text-sm">分享到</span>
-        <button class="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors" aria-label="Copy link">
-          <span class="material-symbols-outlined text-white/60">link</span>
+      <div class="flex items-center justify-center gap-4 mt-12 pt-8 border-t border-default">
+        <span class="text-muted text-sm">分享到</span>
+        <button class="chip-neutral p-2 rounded-full transition-colors" aria-label="Copy link">
+          <span class="material-symbols-outlined text-secondary">link</span>
         </button>
       </div>
     </article>
   </main>
   
-  <footer class="bg-black/50 backdrop-blur-sm border-t border-white/10 py-8 px-6">
-    <div class="max-w-7xl mx-auto text-center text-white/40 text-sm">
+  <footer class="site-footer py-8 px-6">
+    <div class="max-w-7xl mx-auto text-center text-muted text-sm">
       © 2026 Global Frame. All rights reserved.
     </div>
   </footer>
@@ -151,13 +151,13 @@ const relatedNotes = allNotes
 <style is:global>
   /* Prose styles for markdown content */
   .prose {
-    --tw-prose-body: #A1A1AA;
-    --tw-prose-headings: #FFFFFF;
-    --tw-prose-links: #3B82F6;
-    --tw-prose-bold: #FFFFFF;
+    --tw-prose-body: var(--color-text-secondary);
+    --tw-prose-headings: var(--color-text-primary);
+    --tw-prose-links: var(--color-accent-blue);
+    --tw-prose-bold: var(--color-text-primary);
     --tw-prose-code: #F472B6;
-    --tw-prose-quotes: #71717A;
-    --tw-prose-hr: rgba(255, 255, 255, 0.1);
+    --tw-prose-quotes: var(--color-text-muted);
+    --tw-prose-hr: var(--color-border);
     max-width: none;
     line-height: 1.8;
   }
@@ -187,7 +187,7 @@ const relatedNotes = allNotes
   }
   
   .prose a:hover {
-    color: #60A5FA;
+    color: color-mix(in srgb, var(--color-accent-blue) 78%, white);
   }
   
   .prose strong {
@@ -197,15 +197,15 @@ const relatedNotes = allNotes
   
   .prose code {
     color: var(--tw-prose-code);
-    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in srgb, var(--color-bg-surface) 72%, transparent);
     padding: 0.2em 0.4em;
     border-radius: 4px;
     font-size: 0.875em;
   }
   
   .prose pre {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: color-mix(in srgb, var(--color-bg-primary) 82%, transparent);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 1.25em;
     overflow-x: auto;
@@ -216,7 +216,7 @@ const relatedNotes = allNotes
     background: none;
     padding: 0;
     font-size: 0.875em;
-    color: #E4E4E7;
+    color: var(--color-text-primary);
   }
   
   .prose blockquote {
@@ -263,21 +263,13 @@ const relatedNotes = allNotes
   
   .prose th,
   .prose td {
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--color-border);
     padding: 0.75em;
     text-align: left;
   }
   
   .prose th {
-    background: rgba(255, 255, 255, 0.05);
+    background: color-mix(in srgb, var(--color-bg-surface) 84%, transparent);
     font-weight: 600;
-  }
-</style>
-
-<style>
-  .glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 </style>

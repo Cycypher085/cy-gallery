@@ -101,6 +101,12 @@
 }
 
 @layer components {
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg-primary) 78%, transparent);
+    backdrop-filter: blur(12px);
+  }
+
   .glass-panel {
     background: color-mix(in srgb, var(--color-bg-surface) 78%, transparent);
     backdrop-filter: blur(24px);
@@ -117,6 +123,35 @@
 
   .glass-card:hover {
     border-color: color-mix(in srgb, var(--color-accent-blue) 36%, var(--color-border));
+  }
+
+  .chip-neutral {
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg-surface) 72%, transparent);
+    color: var(--color-text-secondary);
+    transition: all 180ms ease;
+  }
+
+  .chip-neutral:hover {
+    color: var(--color-text-primary);
+    border-color: color-mix(in srgb, var(--color-accent-blue) 26%, var(--color-border));
+  }
+
+  .input-surface {
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--color-bg-surface) 86%, transparent);
+    color: var(--color-text-primary);
+  }
+
+  .input-surface::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .input-surface:focus {
+    border-color: color-mix(in srgb, var(--color-accent-blue) 56%, var(--color-border));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent-blue) 18%, transparent);
+    outline: none;
   }
 
   .map-glow {
