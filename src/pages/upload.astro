@@ -7,12 +7,12 @@ import Navbar from '../components/Navbar.astro';
   <Navbar />
 
   <main class="pt-28 pb-24 px-6 min-h-screen bg-background-dark">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-5xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-display font-bold text-white mb-4">上传你的作品</h1>
         <p class="text-white/60">
-          与全球摄影爱好者分享你的精彩瞬间。每张照片都是一个故事的开始
+          支持高清照片与视频，自动解析基础参数、拍摄设备与地理位置信息
         </p>
       </div>
 
@@ -20,59 +20,100 @@ import Navbar from '../components/Navbar.astro';
       <div class="glass-panel rounded-2xl p-8 mb-8">
         <div 
           id="drop-zone"
-          class="border-2 border-dashed border-white/20 rounded-xl p-12 text-center cursor-pointer hover:border-accent/50 hover:bg-white/5 transition-all"
+          class="border-2 border-dashed border-white/20 rounded-xl p-10 text-center cursor-pointer hover:border-accent/50 hover:bg-white/5 transition-all"
+          data-testid="upload-drop-zone"
         >
           <div class="mb-6">
             <span class="material-symbols-outlined text-6xl text-white/30">cloud_upload</span>
           </div>
-          <h3 class="text-xl font-medium text-white mb-2">拖拽照片到此处</h3>
-          <p class="text-white/50 text-sm mb-6">或点击选择文件</p>
+          <h3 class="text-xl font-medium text-white mb-2">拖拽照片或视频到此处</h3>
+          <p class="text-white/50 text-sm mb-6">支持批量选择，自动提取可用元数据</p>
           <input 
             type="file" 
             id="file-input" 
-            accept="image/*" 
+            accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime" 
             multiple 
             class="hidden"
+            data-testid="file-input"
           />
           <button 
             id="select-btn"
             class="bg-accent hover:bg-accent/90 text-white px-6 py-2.5 rounded-full font-medium transition-colors"
+            data-testid="select-btn"
           >
-            选择照片
+            选择媒体文件
           </button>
-          <p class="text-white/30 text-xs mt-4">支持 JPG、PNG、WebP，单文件最大 20MB</p>
-        </div>
-
-        <!-- Preview Area -->
-        <div id="preview-area" class="hidden mt-6">
-          <h4 class="text-white font-medium mb-4">已选择 <span id="file-count">0</span> 张照片</h4>
-          <div id="preview-grid" class="grid grid-cols-4 gap-3"></div>
-          <button 
-            id="upload-btn"
-            class="mt-6 w-full bg-accent hover:bg-accent/90 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            <span class="material-symbols-outlined">upload</span>
-            开始上传
-          </button>
+          <p class="text-white/30 text-xs mt-4">
+            支持 JPG、PNG、WebP、MP4、MOV（图片 ≤ 20MB，视频 ≤ 300MB）
+          </p>
         </div>
       </div>
+
+      <!-- Queue and Metadata Workspace -->
+      <section class="glass-card rounded-2xl p-6 md:p-8 mb-8">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-2xl font-semibold text-white mb-1">媒体队列</h2>
+            <p class="text-white/50 text-sm">
+              当前队列：<span id="queue-count" class="text-white font-medium">0</span> 项
+            </p>
+          </div>
+          <button
+            id="save-gallery-btn"
+            class="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/40 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full text-sm font-medium transition-colors inline-flex items-center gap-2"
+            disabled
+            data-testid="save-gallery-btn"
+          >
+            <span class="material-symbols-outlined text-lg">inventory_2</span>
+            保存元数据快照
+          </button>
+          <button
+            id="sync-discovery-btn"
+            class="bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-full text-sm font-medium transition-colors inline-flex items-center gap-2"
+            disabled
+            data-testid="sync-discovery-btn"
+          >
+            <span class="material-symbols-outlined text-lg">sync</span>
+            同步到探索页预览
+          </button>
+        </div>
+
+        <div id="upload-alert" class="hidden mb-4 px-4 py-3 rounded-xl border text-sm" data-testid="upload-alert"></div>
+
+        <div id="empty-state" class="text-center py-16 border border-white/10 rounded-2xl bg-black/20">
+          <span class="material-symbols-outlined text-5xl text-white/20 mb-3">perm_media</span>
+          <p class="text-white/50">暂未添加文件，拖拽或点击上方按钮开始</p>
+        </div>
+
+        <div id="media-queue" class="hidden space-y-4" data-testid="media-queue"></div>
+      </section>
+
+      <section class="glass-card rounded-2xl p-6 md:p-8 mb-8" data-testid="saved-gallery-section">
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <h2 class="text-xl font-semibold text-white">已保存到画廊的数据快照</h2>
+          <p class="text-xs text-white/45">保存后会同步到发现页展示（本地浏览器）</p>
+        </div>
+        <div id="saved-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <p class="text-white/50 text-sm col-span-full">暂无已保存快照</p>
+        </div>
+      </section>
 
       <!-- Info Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="glass-card rounded-xl p-6 text-center">
+          <span class="material-symbols-outlined text-3xl text-accent mb-3">camera</span>
+          <h4 class="text-white font-medium mb-1">拍摄参数</h4>
+          <p class="text-white/50 text-sm">自动展示分辨率、时长、ISO、光圈、快门等关键字段</p>
+        </div>
+        <div class="glass-card rounded-xl p-6 text-center">
+          <span class="material-symbols-outlined text-3xl text-accent mb-3">devices</span>
+          <h4 class="text-white font-medium mb-1">设备信息</h4>
+          <p class="text-white/50 text-sm">支持查看相机品牌、机型与镜头信息，缺失时自动兜底</p>
+        </div>
+        <div class="glass-card rounded-xl p-6 text-center">
           <span class="material-symbols-outlined text-3xl text-accent mb-3">location_on</span>
           <h4 class="text-white font-medium mb-1">地理位置</h4>
-          <p class="text-white/50 text-sm">自动提取 EXIF GPS 信息，在地图上展示</p>
-        </div>
-        <div class="glass-card rounded-xl p-6 text-center">
-          <span class="material-symbols-outlined text-3xl text-accent mb-3">group</span>
-          <h4 class="text-white font-medium mb-1">邀请码制度</h4>
-          <p class="text-white/50 text-sm">仅受邀朋友可以上传，维护社区品质</p>
-        </div>
-        <div class="glass-card rounded-xl p-6 text-center">
-          <span class="material-symbols-outlined text-3xl text-accent mb-3">high_quality</span>
-          <h4 class="text-white font-medium mb-1">高清存储</h4>
-          <p class="text-white/50 text-sm">原图保存在 Cloudflare R2，支持大尺寸展示</p>
+          <p class="text-white/50 text-sm">若媒体包含 GPS 坐标，可直接跳转地图定位查看</p>
         </div>
       </div>
 
@@ -92,7 +133,7 @@ import Navbar from '../components/Navbar.astro';
               支持哪些格式？
               <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
             </summary>
-            <p class="text-white/60 text-sm mt-3">支持 JPG、PNG、WebP 格式。建议使用高质量原图以获得最佳展示效果。</p>
+            <p class="text-white/60 text-sm mt-3">支持 JPG、PNG、WebP、MP4、MOV。建议使用高质量素材以获得最佳展示效果。</p>
           </details>
           <details class="glass-card rounded-lg p-4 group">
             <summary class="text-white font-medium cursor-pointer flex items-center justify-between">
@@ -107,66 +148,621 @@ import Navbar from '../components/Navbar.astro';
   </main>
 
   <script>
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const selectBtn = document.getElementById('select-btn');
-    const previewArea = document.getElementById('preview-area');
-    const previewGrid = document.getElementById('preview-grid');
-    const fileCount = document.getElementById('file-count');
+    // @ts-ignore - Astro handles browser-side ESM import at build time.
+    import * as exifr from 'exifr';
 
-    let selectedFiles = [];
+    const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    const SUPPORTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime'];
+    const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+    const MAX_VIDEO_SIZE = 300 * 1024 * 1024;
+    const STORAGE_KEY = 'gf-uploaded-media';
+
+    const dropZone = document.getElementById('drop-zone') as HTMLElement | null;
+    const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
+    const selectBtn = document.getElementById('select-btn') as HTMLButtonElement | null;
+    const queueEl = document.getElementById('media-queue') as HTMLElement | null;
+    const emptyState = document.getElementById('empty-state') as HTMLElement | null;
+    const queueCount = document.getElementById('queue-count') as HTMLElement | null;
+    const saveBtn = document.getElementById('save-gallery-btn') as HTMLButtonElement | null;
+    const syncBtn = document.getElementById('sync-discovery-btn') as HTMLButtonElement | null;
+    const alertEl = document.getElementById('upload-alert') as HTMLElement | null;
+
+    type MediaType = 'image' | 'video';
+
+    interface MediaMeta {
+      width: number | null;
+      height: number | null;
+      duration: number | null;
+      capturedAt: string | null;
+      cameraMake: string | null;
+      cameraModel: string | null;
+      lens: string | null;
+      iso: number | null;
+      aperture: string | null;
+      shutter: string | null;
+      focalLength: string | null;
+      lat: number | null;
+      lng: number | null;
+    }
+
+    interface MediaQueueItem {
+      id: string;
+      name: string;
+      mimeType: string;
+      size: number;
+      mediaType: MediaType;
+      previewUrl: string;
+      title: string;
+      location: string;
+      photographer: string;
+      tags: string[];
+      meta: MediaMeta;
+    }
+
+    const mediaQueue: MediaQueueItem[] = [];
+    const objectUrls: string[] = [];
+
+    function showAlert(message: string, kind: 'error' | 'success') {
+      if (!alertEl) return;
+      alertEl.textContent = message;
+      alertEl.className = `mb-4 px-4 py-3 rounded-xl border text-sm ${
+        kind === 'error'
+          ? 'border-red-400/40 bg-red-500/15 text-red-200'
+          : 'border-green-400/40 bg-green-500/15 text-green-100'
+      }`;
+      alertEl.classList.remove('hidden');
+    }
+
+    function clearAlert() {
+      alertEl?.classList.add('hidden');
+    }
+
+    function formatFileSize(bytes: number): string {
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function formatDuration(seconds: number | null): string {
+      if (!seconds || Number.isNaN(seconds)) return '--';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function formatDate(isoDate: string | null): string {
+      if (!isoDate) return '--';
+      const date = new Date(isoDate);
+      if (Number.isNaN(date.getTime())) return '--';
+      return date.toLocaleString('zh-CN');
+    }
+
+    function toDatetimeLocalValue(isoDate: string | null): string {
+      if (!isoDate) return '';
+      const date = new Date(isoDate);
+      if (Number.isNaN(date.getTime())) return '';
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 16);
+    }
+
+    function escapeHtml(input: string): string {
+      return input
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function toDecimal(value: unknown, ref: string | null | undefined): number | null {
+      if (typeof value !== 'number') return null;
+      const signed = ref === 'S' || ref === 'W' ? -Math.abs(value) : Math.abs(value);
+      return Math.round(signed * 1e6) / 1e6;
+    }
+
+    function toIsoDate(value: unknown): string | null {
+      if (value instanceof Date && !Number.isNaN(value.getTime())) {
+        return value.toISOString();
+      }
+      if (typeof value === 'string' || typeof value === 'number') {
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime())) {
+          return parsed.toISOString();
+        }
+      }
+      return null;
+    }
+
+    async function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+      const url = URL.createObjectURL(file);
+      objectUrls.push(url);
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+        img.onerror = () => reject(new Error('failed to load image'));
+        img.src = url;
+      });
+    }
+
+    async function getVideoMeta(file: File): Promise<{ width: number; height: number; duration: number }> {
+      const url = URL.createObjectURL(file);
+      objectUrls.push(url);
+      return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+          resolve({
+            width: video.videoWidth || 0,
+            height: video.videoHeight || 0,
+            duration: video.duration || 0,
+          });
+        };
+        video.onerror = () => reject(new Error('failed to load video'));
+        video.src = url;
+      });
+    }
+
+    function getMediaType(file: File): MediaType | null {
+      if (SUPPORTED_IMAGE_TYPES.includes(file.type)) return 'image';
+      if (SUPPORTED_VIDEO_TYPES.includes(file.type)) return 'video';
+      return null;
+    }
+
+    async function buildMediaQueueItem(file: File): Promise<MediaQueueItem | null> {
+      const mediaType = getMediaType(file);
+      if (!mediaType) return null;
+
+      const sizeLimit = mediaType === 'image' ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE;
+      if (file.size > sizeLimit) {
+        const limitLabel = mediaType === 'image' ? '20MB' : '300MB';
+        showAlert(`${file.name} 超过限制（${limitLabel}）`, 'error');
+        return null;
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+      objectUrls.push(previewUrl);
+      const baseMeta: MediaMeta = {
+        width: null,
+        height: null,
+        duration: null,
+        capturedAt: file.lastModified ? new Date(file.lastModified).toISOString() : null,
+        cameraMake: null,
+        cameraModel: null,
+        lens: null,
+        iso: null,
+        aperture: null,
+        shutter: null,
+        focalLength: null,
+        lat: null,
+        lng: null,
+      };
+
+      if (mediaType === 'image') {
+        const dimensions = await getImageDimensions(file).catch(() => ({ width: 0, height: 0 }));
+        baseMeta.width = dimensions.width || null;
+        baseMeta.height = dimensions.height || null;
+
+        try {
+          const exif = await exifr.parse(file, true);
+          if (exif) {
+            baseMeta.capturedAt = toIsoDate(exif.DateTimeOriginal) ?? baseMeta.capturedAt;
+            baseMeta.cameraMake = exif.Make ?? null;
+            baseMeta.cameraModel = exif.Model ?? null;
+            baseMeta.lens = exif.LensModel ?? exif.LensInfo ?? null;
+            baseMeta.iso = typeof exif.ISO === 'number' ? exif.ISO : null;
+            baseMeta.aperture = exif.FNumber ? `f/${exif.FNumber}` : null;
+            baseMeta.shutter = exif.ExposureTime ? `${exif.ExposureTime}s` : null;
+            baseMeta.focalLength = exif.FocalLength ? `${exif.FocalLength}mm` : null;
+            baseMeta.lat = toDecimal(exif.latitude ?? exif.GPSLatitude, exif.GPSLatitudeRef);
+            baseMeta.lng = toDecimal(exif.longitude ?? exif.GPSLongitude, exif.GPSLongitudeRef);
+          }
+        } catch (_error) {
+          // Keep fallback values when EXIF is unavailable.
+        }
+      } else {
+        const videoMeta = await getVideoMeta(file).catch(() => ({ width: 0, height: 0, duration: 0 }));
+        baseMeta.width = videoMeta.width || null;
+        baseMeta.height = videoMeta.height || null;
+        baseMeta.duration = videoMeta.duration || null;
+      }
+
+      return {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        name: file.name,
+        mimeType: file.type,
+        size: file.size,
+        mediaType,
+        previewUrl,
+        title: file.name.replace(/\.[^/.]+$/, ''),
+        location: baseMeta.lat != null && baseMeta.lng != null ? `${baseMeta.lat}, ${baseMeta.lng}` : '',
+        photographer: '上传者',
+        tags: [mediaType === 'video' ? '视频' : '照片', '上传'],
+        meta: baseMeta,
+      };
+    }
+
+    function getMapLink(item: MediaQueueItem): string | null {
+      if (item.meta.lat == null || item.meta.lng == null) return null;
+      return `https://www.openstreetmap.org/?mlat=${item.meta.lat}&mlon=${item.meta.lng}#map=12/${item.meta.lat}/${item.meta.lng}`;
+    }
+
+    function renderQueue() {
+      if (!queueEl || !emptyState || !queueCount || !saveBtn || !syncBtn) return;
+      queueCount.textContent = String(mediaQueue.length);
+      saveBtn.disabled = mediaQueue.length === 0;
+      syncBtn.disabled = mediaQueue.length === 0;
+
+      if (mediaQueue.length === 0) {
+        queueEl.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        queueEl.innerHTML = '';
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      queueEl.classList.remove('hidden');
+      queueEl.innerHTML = mediaQueue
+        .map((item, index) => {
+          const mapLink = getMapLink(item);
+          const mediaPreview =
+            item.mediaType === 'image'
+              ? `<img src="${item.previewUrl}" alt="${escapeHtml(item.name)}" class="w-full h-full object-cover" />`
+              : `<video src="${item.previewUrl}" class="w-full h-full object-cover" muted preload="metadata"></video>`;
+
+          return `
+            <article class="rounded-2xl border border-white/10 bg-black/30 p-4 md:p-5" data-testid="media-queue-item">
+              <div class="flex flex-col lg:flex-row gap-5">
+                <div class="w-full lg:w-56">
+                  <div class="aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                    ${mediaPreview}
+                  </div>
+                  <div class="mt-3 flex items-center justify-between text-xs text-white/60">
+                    <span>${item.mediaType === 'image' ? '图片' : '视频'}</span>
+                    <span>${formatFileSize(item.size)}</span>
+                  </div>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                    <div>
+                      <h3 class="text-lg font-medium text-white truncate">${escapeHtml(item.title)}</h3>
+                      <p class="text-xs text-white/45 mt-1">${escapeHtml(item.mimeType)}</p>
+                    </div>
+                  <button
+                    type="button"
+                    class="remove-media px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 text-xs transition-colors"
+                      data-index="${index}"
+                    >
+                      移除
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 text-sm">
+                    <div class="meta-pill" data-testid="meta-resolution">
+                      <span class="meta-label">分辨率</span>
+                      <span class="meta-value">${item.meta.width && item.meta.height ? `${item.meta.width} x ${item.meta.height}` : '--'}</span>
+                    </div>
+                    <div class="meta-pill" data-testid="meta-duration">
+                      <span class="meta-label">时长</span>
+                      <span class="meta-value">${formatDuration(item.meta.duration)}</span>
+                    </div>
+                    <div class="meta-pill">
+                      <span class="meta-label">拍摄时间</span>
+                      <span class="meta-value">${formatDate(item.meta.capturedAt)}</span>
+                    </div>
+                    <div class="meta-pill" data-testid="meta-camera">
+                      <span class="meta-label">设备</span>
+                      <span class="meta-value">${item.meta.cameraMake || item.meta.cameraModel ? `${item.meta.cameraMake ?? ''} ${item.meta.cameraModel ?? ''}`.trim() : '--'}</span>
+                    </div>
+                    <div class="meta-pill">
+                      <span class="meta-label">镜头</span>
+                      <span class="meta-value">${item.meta.lens ?? '--'}</span>
+                    </div>
+                    <div class="meta-pill">
+                      <span class="meta-label">ISO / 光圈 / 快门</span>
+                      <span class="meta-value">ISO ${item.meta.iso ?? '--'} · ${item.meta.aperture ?? '--'} · ${item.meta.shutter ?? '--'}</span>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <label class="edit-field">
+                      <span class="edit-label">标题</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.title)}"
+                        data-index="${index}"
+                        data-field="title"
+                        data-testid="meta-edit-title"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">地点描述</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.location)}"
+                        data-index="${index}"
+                        data-field="location"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">摄影者</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.photographer)}"
+                        data-index="${index}"
+                        data-field="photographer"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">标签（逗号分隔）</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.tags.join(', '))}"
+                        data-index="${index}"
+                        data-field="tags"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">拍摄时间</span>
+                      <input
+                        type="datetime-local"
+                        value="${toDatetimeLocalValue(item.meta.capturedAt)}"
+                        data-index="${index}"
+                        data-field="capturedAt"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">设备型号</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.meta.cameraModel ?? '')}"
+                        data-index="${index}"
+                        data-field="cameraModel"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">纬度</span>
+                      <input
+                        type="number"
+                        step="0.000001"
+                        value="${item.meta.lat ?? ''}"
+                        data-index="${index}"
+                        data-field="lat"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">经度</span>
+                      <input
+                        type="number"
+                        step="0.000001"
+                        value="${item.meta.lng ?? ''}"
+                        data-index="${index}"
+                        data-field="lng"
+                        class="edit-input"
+                      />
+                    </label>
+                  </div>
+
+                  <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <div class="meta-pill flex-1 min-w-[230px]" data-testid="meta-location">
+                      <span class="meta-label">经纬度</span>
+                      <span class="meta-value">${item.meta.lat != null && item.meta.lng != null ? `${item.meta.lat}, ${item.meta.lng}` : '--'}</span>
+                    </div>
+                    ${
+                      mapLink
+                        ? `<a href="${mapLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs transition-colors" data-testid="map-link-active">地图定位</a>`
+                        : `<button type="button" disabled class="px-3 py-2 rounded-full bg-white/5 text-white/30 text-xs cursor-not-allowed" data-testid="map-link-disabled">无可用位置</button>`
+                    }
+                  </div>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+    }
+
+    async function handleFiles(fileList: FileList | null) {
+      if (!fileList || fileList.length === 0) return;
+      clearAlert();
+
+      const files = Array.from(fileList);
+      let unsupportedCount = 0;
+
+      for (const file of files) {
+        const item = await buildMediaQueueItem(file);
+        if (item) {
+          mediaQueue.push(item);
+        } else {
+          unsupportedCount += 1;
+        }
+      }
+
+      renderQueue();
+
+      if (unsupportedCount > 0) {
+        showAlert(`有 ${unsupportedCount} 个文件格式不支持或超过大小限制，已自动跳过。`, 'error');
+      }
+    }
 
     selectBtn?.addEventListener('click', () => fileInput?.click());
-    
+
     dropZone?.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropZone.classList.add('border-accent', 'bg-white/5');
     });
-    
+
     dropZone?.addEventListener('dragleave', () => {
       dropZone.classList.remove('border-accent', 'bg-white/5');
     });
-    
+
     dropZone?.addEventListener('drop', (e) => {
       e.preventDefault();
       dropZone.classList.remove('border-accent', 'bg-white/5');
-      handleFiles(e.dataTransfer?.files);
+      handleFiles(e.dataTransfer?.files ?? null);
     });
 
     fileInput?.addEventListener('change', (e) => {
-      handleFiles(e.target.files);
+      const target = e.target as HTMLInputElement;
+      handleFiles(target.files);
+      target.value = '';
     });
 
-    function handleFiles(files) {
-      selectedFiles = Array.from(files);
-      if (selectedFiles.length > 0) {
-        previewArea?.classList.remove('hidden');
-        fileCount.textContent = String(selectedFiles.length);
-        renderPreviews();
-      }
-    }
+    queueEl?.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const button = target.closest('.remove-media') as HTMLButtonElement | null;
+      if (!button) return;
+      const index = Number(button.dataset.index);
+      if (Number.isNaN(index)) return;
+      mediaQueue.splice(index, 1);
+      renderQueue();
+    });
 
-    function renderPreviews() {
-      if (!previewGrid) return;
-      previewGrid.innerHTML = selectedFiles.map((file, i) => `
-        <div class="aspect-square rounded-lg overflow-hidden bg-white/10 relative">
-          <img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover" />
-          <button 
-            onclick="removeFile(${i})"
-            class="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white/70 hover:text-white"
-          >×</button>
-        </div>
-      `).join('');
-    }
+    queueEl?.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      if (!target || !target.dataset.field) return;
+      const index = Number(target.dataset.index);
+      if (Number.isNaN(index) || !mediaQueue[index]) return;
+      const item = mediaQueue[index];
+      const field = target.dataset.field;
+      const value = target.value;
 
-    (window as any).removeFile = (index: number) => {
-      selectedFiles.splice(index, 1);
-      fileCount.textContent = String(selectedFiles.length);
-      if (selectedFiles.length === 0) {
-        previewArea?.classList.add('hidden');
-      } else {
-        renderPreviews();
+      if (field === 'title') item.title = value.trim();
+      if (field === 'location') item.location = value.trim();
+      if (field === 'photographer') item.photographer = value.trim();
+      if (field === 'tags') item.tags = value.split(',').map((tag) => tag.trim()).filter(Boolean);
+      if (field === 'cameraModel') item.meta.cameraModel = value.trim() || null;
+      if (field === 'capturedAt') {
+        if (!value) {
+          item.meta.capturedAt = null;
+        } else {
+          const parsedDate = new Date(value);
+          item.meta.capturedAt = Number.isNaN(parsedDate.getTime()) ? null : parsedDate.toISOString();
+        }
       }
-    };
+
+      if (field === 'lat') {
+        if (value.trim() === '') {
+          item.meta.lat = null;
+        } else {
+          const lat = Number(value);
+          item.meta.lat = Number.isFinite(lat) ? lat : null;
+        }
+      }
+      if (field === 'lng') {
+        if (value.trim() === '') {
+          item.meta.lng = null;
+        } else {
+          const lng = Number(value);
+          item.meta.lng = Number.isFinite(lng) ? lng : null;
+        }
+      }
+    });
+
+    saveBtn?.addEventListener('click', () => {
+      const snapshot = mediaQueue.map((item) => ({
+        id: item.id,
+        name: item.name,
+        title: item.title,
+        location: item.location,
+        photographer: item.photographer,
+        tags: item.tags,
+        mediaType: item.mediaType,
+        mimeType: item.mimeType,
+        size: item.size,
+        meta: item.meta,
+        savedAt: new Date().toISOString(),
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+      showAlert(`已保存 ${snapshot.length} 条媒体元数据到本地快照。`, 'success');
+    });
+
+    syncBtn?.addEventListener('click', () => {
+      if (mediaQueue.length === 0) {
+        showAlert('请先添加至少一个媒体文件，再同步到探索页。', 'error');
+        return;
+      }
+
+      const discoveryPayload = mediaQueue.map((item, index) => ({
+        id: item.id,
+        mediaType: item.mediaType,
+        title: item.title || item.name.replace(/\.[^/.]+$/, ''),
+        location: item.location || (item.meta.lat != null && item.meta.lng != null ? `${item.meta.lat}, ${item.meta.lng}` : '待补充位置'),
+        url: item.previewUrl,
+        thumbnail: item.previewUrl,
+        photographer: item.photographer || '上传者',
+        category: item.mediaType === 'video' ? '视频' : '上传',
+        tags: item.tags.length > 0 ? item.tags : [item.mediaType === 'video' ? '视频' : '照片', '上传'],
+        meta: item.meta,
+        order: index,
+      }));
+
+      localStorage.setItem('gf-discovery-media', JSON.stringify(discoveryPayload));
+      showAlert(`已同步 ${discoveryPayload.length} 条媒体到探索页预览数据。`, 'success');
+    });
+
+    window.addEventListener('beforeunload', () => {
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    });
   </script>
+
+  <style>
+    .meta-pill {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.9rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.6rem 0.75rem;
+      min-height: 62px;
+    }
+
+    .meta-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .meta-value {
+      font-size: 0.82rem;
+      line-height: 1.3;
+      color: rgba(255, 255, 255, 0.92);
+      word-break: break-word;
+    }
+
+    .edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .edit-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .edit-input {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.9);
+      padding: 0.48rem 0.65rem;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 180ms ease;
+    }
+
+    .edit-input:focus {
+      border-color: rgba(59, 130, 246, 0.85);
+    }
+  </style>
 </Layout>

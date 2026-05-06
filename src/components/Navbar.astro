@@ -1,11 +1,19 @@
 ---
 const navItems = [
   { href: '/discovery', label: '探索', en: 'Explore' },
+  { href: '/notes', label: '笔记', en: 'Notes' },
   { href: '/collections', label: '专辑', en: 'Collections' },
   { href: '/upload', label: '上传', en: 'Upload' },
 ];
 
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+function isNavActive(href: string): boolean {
+  if (href === '/') {
+    return currentPath === '/';
+  }
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+}
 ---
 
 <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300">
@@ -21,14 +29,14 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         <a 
           class:list={[
             "relative group transition-colors",
-            { "text-blue-500 dark:text-blue-400": currentPath === item.href || currentPath === item.href + '/' }
+            { "text-blue-500 dark:text-blue-400": isNavActive(item.href) }
           ]} 
           href={item.href}
         >
           {item.label}
           <span class:list={[
             "absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left",
-            { "scale-x-100": currentPath === item.href || currentPath === item.href + '/' }
+            { "scale-x-100": isNavActive(item.href) }
           ]}></span>
         </a>
       ))}
@@ -79,8 +87,8 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
           class:list={[
             "block py-3 px-4 rounded-xl transition-colors",
             { 
-              "bg-blue-500/20 text-blue-400": currentPath === item.href || currentPath === item.href + '/',
-              "hover:bg-white/5": currentPath !== item.href && currentPath !== item.href + '/'
+              "bg-blue-500/20 text-blue-400": isNavActive(item.href),
+              "hover:bg-white/5": !isNavActive(item.href)
             }
           ]} 
           href={item.href}

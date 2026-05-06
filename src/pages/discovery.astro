@@ -1,23 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
-import PhotoGrid from '../components/gallery/PhotoGrid.astro';
 import PhotoViewer from '../components/gallery/PhotoViewer.astro';
+import { galleryMedia } from '../lib/media';
 
-const photos = [
-  { id: '1', location: '云南·大理', lat: 25.6065, lng: 100.2679, title: '洱海晨曦', url: 'https://images.unsplash.com/photo-1528183429752-8e2a3f8f94b9?w=1200', thumbnail: 'https://images.unsplash.com/photo-1528183429752-8e2a3f8f94b9?w=600', photographer: '摄影师A', category: '自然', takenAt: '2026-03-15', tags: ['自然', '湖泊'] },
-  { id: '2', location: '西藏·拉萨', lat: 29.6520, lng: 91.1721, title: '布达拉宫', url: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=1200', thumbnail: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=600', photographer: '摄影师B', category: '建筑', takenAt: '2026-03-10', tags: ['建筑', '宗教'] },
-  { id: '3', location: '冰岛·雷克雅未克', lat: 64.1466, lng: -21.9426, title: '极光之夜', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1200', thumbnail: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=600', photographer: '摄影师C', category: '自然', takenAt: '2026-02-28', tags: ['极光', '夜景'] },
-  { id: '4', location: '日本·京都', lat: 35.0116, lng: 135.7681, title: '竹林绿意', url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200', thumbnail: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600', photographer: '摄影师D', category: '自然', takenAt: '2026-04-01', tags: ['竹林', '日本'] },
-  { id: '5', location: '挪威·特罗姆瑟', lat: 69.6496, lng: 18.9560, title: '极光探险', url: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=1200', thumbnail: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=600', photographer: '摄影师E', category: '自然', takenAt: '2026-01-20', tags: ['极光', '探险'] },
-  { id: '6', location: '新西兰·皇后镇', lat: -45.0312, lng: 168.6626, title: '湖光山色', url: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=1200', thumbnail: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?w=600', photographer: '摄影师F', category: '自然', takenAt: '2026-02-15', tags: ['湖泊', '山脉'] },
-  { id: '7', location: '瑞士·因特拉肯', lat: 46.6863, lng: 7.8632, title: '少女峰', url: 'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=1200', thumbnail: 'https://images.unsplash.com/photo-1531210483974-4f8c1f33fd35?w=600', photographer: '摄影师G', category: '自然', takenAt: '2026-03-22', tags: ['雪山', '瑞士'] },
-  { id: '8', location: '意大利·威尼斯', lat: 45.4408, lng: 12.3155, title: '水城时光', url: 'https://images.unsplash.com/photo-1514890547357-a9ee288728e0?w=1200', thumbnail: 'https://images.unsplash.com/photo-1514890547357-a9ee288728e0?w=600', photographer: '摄影师H', category: '城市', takenAt: '2026-04-05', tags: ['水城', '意大利'] },
-  { id: '9', location: '希腊·圣托里尼', lat: 36.3932, lng: 25.4615, title: '蓝顶白墙', url: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1200', thumbnail: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600', photographer: '摄影师I', category: '城市', takenAt: '2026-03-28', tags: ['希腊', '爱琴海'] },
-];
-
-const categories = ['全部', '自然', '城市', '建筑'];
+const photos = galleryMedia;
+const categories = ['全部', ...new Set(photos.map((photo) => photo.category))];
 const photosJson = JSON.stringify(photos);
+const categoriesJson = JSON.stringify(categories);
 ---
 
 <Layout title="探索 | Global Frame">
@@ -81,16 +71,17 @@ const photosJson = JSON.stringify(photos);
 
       <!-- Grid View -->
       <div id="view-grid" class="view-content">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="discovery-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {photos.map((photo, index) => (
             <article 
               class="group glass-card rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 hover:border-blue-500/50 hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:-translate-y-1"
               data-category={photo.category}
               data-index={index}
+              data-testid="gallery-card"
             >
               <div class="aspect-[4/3] overflow-hidden relative">
-                <img 
-                  src={photo.thumbnail} 
+                  <img
+                    src={photo.thumbnail || photo.url}
                   alt={photo.title}
                   loading="lazy"
                   decoding="async"
@@ -122,11 +113,19 @@ const photosJson = JSON.stringify(photos);
                     <span class="material-symbols-outlined text-sm">person</span>
                     {photo.photographer}
                   </p>
+                  <p class="text-white/50 text-sm flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">calendar_today</span>
+                    {photo.meta.capturedAt ? new Date(photo.meta.capturedAt).toLocaleDateString('zh-CN') : '--'}
+                  </p>
                   <div class="flex gap-1">
                     {photo.tags.slice(0, 2).map(tag => (
                       <span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/60">{tag}</span>
                     ))}
                   </div>
+                </div>
+                <div class="mt-2 text-xs text-white/45 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">photo_camera</span>
+                  {[photo.meta.cameraMake, photo.meta.cameraModel].filter(Boolean).join(' ') || '--'}
                 </div>
               </div>
             </article>
@@ -185,21 +184,152 @@ const photosJson = JSON.stringify(photos);
   </footer>
 </Layout>
 
-<script define:vars={{ photosJson }}>
+<script define:vars={{ photosJson, categoriesJson }}>
+  const LOCAL_STORAGE_KEY = 'gf-discovery-media';
   const photos = JSON.parse(photosJson);
-  
-  // View switching
+  const categories = JSON.parse(categoriesJson);
+  const discoveryGrid = document.getElementById('discovery-grid');
+  const filterBar = document.getElementById('filter-bar');
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  function normalizePhoto(raw, fallbackIndex) {
+    return {
+      id: raw.id ?? `local-${fallbackIndex}`,
+      mediaType: raw.mediaType ?? 'image',
+      title: raw.title ?? '未命名媒体',
+      location: raw.location ?? '待补充位置',
+      url: raw.url ?? '',
+      thumbnail: raw.thumbnail ?? raw.url ?? '',
+      photographer: raw.photographer ?? '上传者',
+      category: raw.category ?? '上传',
+      tags: Array.isArray(raw.tags) ? raw.tags : [],
+      meta: raw.meta ?? {},
+    };
+  }
+
+  function ensureFilterButton(category) {
+    if (!filterBar || categories.includes(category)) return;
+    categories.push(category);
+    const filterButton = document.createElement('button');
+    filterButton.className =
+      'px-4 py-2 rounded-full text-sm font-medium transition-all bg-white/10 text-white/70 hover:bg-white/20 hover:text-white';
+    filterButton.dataset.filter = category;
+    filterButton.textContent = category;
+    filterBar.appendChild(filterButton);
+  }
+
+  function hydrateLocalMedia() {
+    const localMediaRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!localMediaRaw) return;
+    try {
+      const parsedMedia = JSON.parse(localMediaRaw);
+      if (!Array.isArray(parsedMedia) || parsedMedia.length === 0) return;
+      const normalized = parsedMedia.map((item, index) => normalizePhoto(item, index));
+      photos.unshift(...normalized);
+      normalized.forEach((item) => ensureFilterButton(item.category));
+    } catch (_error) {
+      // Ignore malformed local media cache and fallback to built-in media.
+    }
+  }
+
+  function renderDiscoveryGrid(data) {
+    if (!discoveryGrid) return;
+    discoveryGrid.innerHTML = data
+      .map((photo, index) => {
+        const cameraLabel =
+          [photo.meta?.cameraMake, photo.meta?.cameraModel].filter(Boolean).join(' ').trim() || '--';
+        const dateLabel = photo.meta?.capturedAt
+          ? new Date(photo.meta.capturedAt).toLocaleDateString('zh-CN')
+          : '--';
+        const tags = (photo.tags || [])
+          .slice(0, 2)
+          .map(
+            (tag) =>
+              `<span class="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/60">${escapeHtml(tag)}</span>`
+          )
+          .join('');
+        return `
+          <article
+            class="group glass-card rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 hover:border-blue-500/50 hover:shadow-[0_0_40px_rgba(59,130,246,0.2)] hover:-translate-y-1"
+            data-category="${escapeHtml(photo.category)}"
+            data-index="${index}"
+            data-testid="gallery-card"
+          >
+            <div class="aspect-[4/3] overflow-hidden relative">
+              <img
+                src="${escapeHtml(photo.thumbnail || photo.url)}"
+                alt="${escapeHtml(photo.title)}"
+                loading="lazy"
+                decoding="async"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
+              <div class="absolute top-4 left-4 bg-black/40 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-blue-400">location_on</span>
+                <span class="text-white/90 text-sm">${escapeHtml(photo.location)}</span>
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  class="open-viewer-btn bg-white/20 backdrop-blur-sm text-white py-3 px-6 rounded-full text-sm font-medium hover:bg-white/30 transition-colors flex items-center gap-2"
+                  data-index="${index}"
+                >
+                  <span class="material-symbols-outlined text-sm">fullscreen</span>
+                  查看大图
+                </button>
+              </div>
+            </div>
+            <div class="p-5">
+              <h3 class="text-white font-medium text-lg mb-2">${escapeHtml(photo.title)}</h3>
+              <div class="flex items-center justify-between">
+                <p class="text-white/50 text-sm flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">person</span>
+                  ${escapeHtml(photo.photographer)}
+                </p>
+                <p class="text-white/50 text-sm flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">calendar_today</span>
+                  ${dateLabel}
+                </p>
+                <div class="flex gap-1">${tags}</div>
+              </div>
+              <div class="mt-2 text-xs text-white/45 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">photo_camera</span>
+                ${escapeHtml(cameraLabel)}
+              </div>
+            </div>
+          </article>
+        `;
+      })
+      .join('');
+  }
+
+  function syncViewerData() {
+    if (typeof window.setPhotoViewerData === 'function') {
+      window.setPhotoViewerData(photos);
+    }
+  }
+
+  hydrateLocalMedia();
+  renderDiscoveryGrid(photos);
+  syncViewerData();
+
   const viewToggle = document.getElementById('view-toggle');
   const viewContents = document.querySelectorAll('.view-content');
-  
+
   viewToggle?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.view-btn');
+    const target = e.target;
+    const btn = target.closest('.view-btn');
     if (!btn) return;
-    
+
     const view = btn.dataset.view;
-    
-    // Update active button
-    viewToggle.querySelectorAll('.view-btn').forEach(b => {
+    viewToggle.querySelectorAll('.view-btn').forEach((b) => {
       if (b === btn) {
         b.classList.add('bg-white/10', 'text-white');
         b.classList.remove('text-white/50');
@@ -208,57 +338,45 @@ const photosJson = JSON.stringify(photos);
         b.classList.add('text-white/50');
       }
     });
-    
-    // Show selected view
-    viewContents.forEach(content => {
+
+    viewContents.forEach((content) => {
       content.classList.add('hidden');
     });
     document.getElementById(`view-${view}`)?.classList.remove('hidden');
-    
-    // Initialize map if needed
+
     if (view === 'map') {
       initMap();
     }
   });
-  
-  // Photo Viewer integration
-  document.querySelectorAll('.open-viewer-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+
+  discoveryGrid?.addEventListener('click', (e) => {
+    const target = e.target;
+    const openBtn = target.closest('.open-viewer-btn');
+    if (openBtn) {
       e.preventDefault();
       e.stopPropagation();
-      const index = parseInt(btn.dataset.index || '0');
+      const index = Number(openBtn.dataset.index || '0');
       if (window.openPhotoViewer) {
         window.openPhotoViewer(index);
       }
-    });
-  });
-  
-  // Also make entire card clickable
-  document.querySelectorAll('[data-index]').forEach(card => {
-    if (!card.classList.contains('open-viewer-btn')) {
-      card.style.cursor = 'pointer';
-      card.addEventListener('click', (e) => {
-        if (!e.target.closest('.open-viewer-btn')) {
-          const index = parseInt(card.dataset.index || '0');
-          if (window.openPhotoViewer) {
-            window.openPhotoViewer(index);
-          }
-        }
-      });
+      return;
+    }
+
+    const card = target.closest('[data-index]');
+    if (!card) return;
+    const index = Number(card.dataset.index || '0');
+    if (window.openPhotoViewer) {
+      window.openPhotoViewer(index);
     }
   });
-  
-  // Filter functionality
-  const filterBar = document.getElementById('filter-bar');
-  const photoGrid = document.getElementById('view-grid');
-  
+
   filterBar?.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-filter]');
+    const target = e.target;
+    const btn = target.closest('[data-filter]');
     if (!btn) return;
-    
+
     const filter = btn.dataset.filter;
-    
-    filterBar.querySelectorAll('[data-filter]').forEach(b => {
+    filterBar.querySelectorAll('[data-filter]').forEach((b) => {
       if (b === btn) {
         b.classList.add('bg-blue-500', 'text-white');
         b.classList.remove('bg-white/10', 'text-white/70', 'hover:bg-white/20', 'hover:text-white');
@@ -267,10 +385,11 @@ const photosJson = JSON.stringify(photos);
         b.classList.add('bg-white/10', 'text-white/70', 'hover:bg-white/20', 'hover:text-white');
       }
     });
-    
-    photoGrid?.querySelectorAll('[data-category]').forEach(card => {
+
+    document.querySelectorAll('[data-category]').forEach((card) => {
       const el = card;
-      if (filter === '全部' || el.dataset.category === filter) {
+      const category = el.dataset.category ?? '';
+      if (filter === '全部' || category === filter) {
         el.style.display = '';
         el.style.animation = 'fadeSlideUp 0.3s ease-out';
       } else {
@@ -278,60 +397,53 @@ const photosJson = JSON.stringify(photos);
       }
     });
   });
-  
-  // Load more placeholder
+
   document.getElementById('load-more-btn')?.addEventListener('click', () => {
     alert('加载更多功能开发中，敬请期待！');
   });
-  
-  // Map initialization
+
   let mapInitialized = false;
   function initMap() {
     if (mapInitialized) return;
-    
     const mapContainer = document.getElementById('discovery-map');
     if (!mapContainer) return;
-    
-    // Check if leaflet is available
     if (typeof L === 'undefined') {
       console.warn('Leaflet not loaded');
       return;
     }
-    
+
     const map = L.map('discovery-map', {
       center: [20, 0],
       zoom: 2,
       attributionControl: false,
     });
-    
+
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
-      maxZoom: 19
+      maxZoom: 19,
     }).addTo(map);
-    
-    // Add markers
+
     photos.forEach((photo, index) => {
-      if (photo.lat && photo.lng) {
-        const marker = L.marker([photo.lat, photo.lng]).addTo(map);
-        
-        const popupContent = `
-          <div style="min-width: 200px;">
-            <img src="${photo.thumbnail}" alt="${photo.title}" style="width: 100%; border-radius: 8px; margin-bottom: 8px;" />
-            <h3 style="color: #333; font-weight: 600; margin-bottom: 4px;">${photo.title}</h3>
-            <p style="color: #666; font-size: 12px;">${photo.location}</p>
-            <button 
-              onclick="window.openPhotoViewer && window.openPhotoViewer(${index})"
-              style="margin-top: 8px; width: 100%; padding: 8px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer;"
-            >
-              查看大图
-            </button>
-          </div>
-        `;
-        
-        marker.bindPopup(popupContent);
-      }
+      const lat = Number(photo.meta?.lat);
+      const lng = Number(photo.meta?.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+      const marker = L.marker([lat, lng]).addTo(map);
+      const popupContent = `
+        <div style="min-width: 200px;">
+          <img src="${escapeHtml(photo.thumbnail || photo.url)}" alt="${escapeHtml(photo.title)}" style="width: 100%; border-radius: 8px; margin-bottom: 8px;" />
+          <h3 style="color: #333; font-weight: 600; margin-bottom: 4px;">${escapeHtml(photo.title)}</h3>
+          <p style="color: #666; font-size: 12px;">${escapeHtml(photo.location)}</p>
+          <button
+            onclick="window.openPhotoViewer && window.openPhotoViewer(${index})"
+            style="margin-top: 8px; width: 100%; padding: 8px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer;"
+          >
+            查看大图
+          </button>
+        </div>
+      `;
+      marker.bindPopup(popupContent);
     });
-    
+
     mapInitialized = true;
   }
 </script>

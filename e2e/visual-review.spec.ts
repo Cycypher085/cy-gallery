@@ -67,7 +67,8 @@ test.describe('Global Frame - 自动化测试', () => {
     await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     const cards = page.locator('article[data-category]');
-    await expect(cards).toHaveCount(9, { timeout: 5000 });
+    const totalCards = await cards.count();
+    expect(totalCards).toBeGreaterThanOrEqual(9);
     
     // 点击 "自然" filter
     await page.click('button[data-filter="自然"]', { timeout: 5000 });
@@ -79,7 +80,7 @@ test.describe('Global Frame - 自动化测试', () => {
         .filter(el => (el as HTMLElement).style.display !== 'none').length;
     });
     expect(visibleCount).toBeGreaterThan(0);
-    expect(visibleCount).toBeLessThan(9);
+    expect(visibleCount).toBeLessThan(totalCards);
   });
 
   test('探索页 - 图片懒加载属性', async ({ page }) => {
@@ -105,11 +106,121 @@ test.describe('Global Frame - 自动化测试', () => {
     await expect(page.locator('#select-btn')).toBeVisible({ timeout: 5000 });
   });
 
+  test('上传页 - 非支持格式给出提示', async ({ page }) => {
+    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    await page.setInputFiles('#file-input', {
+      name: 'unsupported.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from('not supported format'),
+    });
+
+    const alert = page.getByTestId('upload-alert');
+    await expect(alert).toBeVisible({ timeout: 5000 });
+    await expect(alert).toContainText('跳过');
+    await expect(page.locator('[data-testid="media-queue-item"]')).toHaveCount(0);
+  });
+
+  test('上传页 - 图片元数据队列与缺失位置兜底', async ({ page }) => {
+    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    const tinyPngBase64 =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO5sVuoAAAAASUVORK5CYII=';
+    const pngBuffer = Buffer.from(tinyPngBase64, 'base64');
+
+    await page.setInputFiles('#file-input', {
+      name: 'tiny.png',
+      mimeType: 'image/png',
+      buffer: pngBuffer,
+    });
+
+    const firstItem = page.locator('[data-testid="media-queue-item"]').first();
+    await expect(firstItem).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="meta-resolution"]').first()).toContainText('1 x 1');
+    await expect(page.locator('[data-testid="meta-location"]').first()).toContainText('--');
+    await expect(page.getByTestId('map-link-disabled').first()).toBeVisible();
+  });
+
+  test('上传页 - 编辑元数据后同步到探索页并可在查看器看到信息区', async ({ page }) => {
+    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    const jpgBuffer = Buffer.from([
+      0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46,
+      0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x60,
+      0x00, 0x60, 0x00, 0x00, 0xff, 0xd9,
+    ]);
+
+    await page.setInputFiles('#file-input', {
+      name: 'meta-test.jpg',
+      mimeType: 'image/jpeg',
+      buffer: jpgBuffer,
+    });
+
+    await page.locator('[data-testid="meta-edit-title"]').first().fill('第三轮测试标题');
+    await page.locator('input[data-field="location"]').first().fill('上海 · 外滩');
+    await page.locator('input[data-field="tags"]').first().fill('第三轮, 上传测试');
+
+    const syncBtn = page.getByTestId('sync-discovery-btn');
+    await expect(syncBtn).toBeEnabled({ timeout: 5000 });
+    await syncBtn.click();
+    await expect(page.getByTestId('upload-alert')).toContainText('已同步');
+
+    await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+    await expect(page.locator('[data-testid="gallery-card"]').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="gallery-card"]').first()).toContainText('第三轮测试标题');
+    await expect(page.locator('[data-testid="gallery-card"]').first()).toContainText('上海 · 外滩');
+    await page.locator('.open-viewer-btn').first().click();
+
+    await expect(page.getByTestId('viewer-params')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('viewer-device')).toBeVisible();
+    await expect(page.getByTestId('viewer-location-block')).toBeVisible();
+  });
+
   test('Nav 链接高亮正确', async ({ page }) => {
     await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     const activeLink = page.locator('nav a:text("探索")');
     await expect(activeLink).toHaveClass(/blue-/, { timeout: 5000 });
+  });
+
+  test('首页 - 双模块入口区块可见', async ({ page }) => {
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    const workflow = page.locator('#workflow-test');
+    await expect(workflow).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('home-module-gallery')).toBeVisible();
+    await expect(page.getByTestId('home-module-notes')).toBeVisible();
+    await expect(page.getByTestId('home-cta-discovery')).toHaveAttribute('href', '/discovery');
+    await expect(page.getByTestId('home-cta-notes')).toHaveAttribute('href', '/notes');
+  });
+
+  test('导航 - 可进入笔记列表', async ({ page }) => {
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    await page.locator('nav').getByRole('link', { name: '笔记' }).click();
+    await expect(page).toHaveURL(/\/notes\/?$/);
+    await expect(page.locator('h1').filter({ hasText: '学习笔记' })).toBeVisible({ timeout: 5000 });
+
+    const notesLink = page.locator('nav').getByRole('link', { name: '笔记' });
+    await expect(notesLink).toHaveClass(/blue-/);
+  });
+
+  test('笔记 - 列表可见并可进入详情', async ({ page }) => {
+    await page.goto(`${BASE_URL}/notes`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+
+    const cards = page.locator('article.note-card');
+    await expect(cards).toHaveCount(4, { timeout: 5000 });
+
+    const firstDetail = cards.first().locator('h2 a');
+    const href = await firstDetail.getAttribute('href');
+    expect(href).toMatch(/^\/notes\//);
+
+    await firstDetail.click();
+    await expect(page).toHaveURL(new RegExp(`^${BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\/notes\\/.+`));
+    await expect(page.locator('article h1').first()).toBeVisible({ timeout: 5000 });
+
+    const notesNav = page.locator('nav').getByRole('link', { name: '笔记' });
+    await expect(notesNav).toHaveClass(/blue-/);
   });
 
   test('页面加载性能 - 无 JS 错误', async ({ page }) => {
