@@ -192,6 +192,10 @@ import Navbar from '../components/Navbar.astro';
       size: number;
       mediaType: MediaType;
       previewUrl: string;
+      title: string;
+      location: string;
+      photographer: string;
+      tags: string[];
       meta: MediaMeta;
     }
 
@@ -231,6 +235,14 @@ import Navbar from '../components/Navbar.astro';
       const date = new Date(isoDate);
       if (Number.isNaN(date.getTime())) return '--';
       return date.toLocaleString('zh-CN');
+    }
+
+    function toDatetimeLocalValue(isoDate: string | null): string {
+      if (!isoDate) return '';
+      const date = new Date(isoDate);
+      if (Number.isNaN(date.getTime())) return '';
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 16);
     }
 
     function escapeHtml(input: string): string {
@@ -361,6 +373,10 @@ import Navbar from '../components/Navbar.astro';
         size: file.size,
         mediaType,
         previewUrl,
+        title: file.name.replace(/\.[^/.]+$/, ''),
+        location: baseMeta.lat != null && baseMeta.lng != null ? `${baseMeta.lat}, ${baseMeta.lng}` : '',
+        photographer: '上传者',
+        tags: [mediaType === 'video' ? '视频' : '照片', '上传'],
         meta: baseMeta,
       };
     }
@@ -409,7 +425,7 @@ import Navbar from '../components/Navbar.astro';
                 <div class="flex-1 min-w-0">
                   <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
                     <div>
-                      <h3 class="text-lg font-medium text-white truncate">${escapeHtml(item.name)}</h3>
+                      <h3 class="text-lg font-medium text-white truncate">${escapeHtml(item.title)}</h3>
                       <p class="text-xs text-white/45 mt-1">${escapeHtml(item.mimeType)}</p>
                     </div>
                   <button
@@ -446,6 +462,92 @@ import Navbar from '../components/Navbar.astro';
                       <span class="meta-label">ISO / 光圈 / 快门</span>
                       <span class="meta-value">ISO ${item.meta.iso ?? '--'} · ${item.meta.aperture ?? '--'} · ${item.meta.shutter ?? '--'}</span>
                     </div>
+                  </div>
+
+                  <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <label class="edit-field">
+                      <span class="edit-label">标题</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.title)}"
+                        data-index="${index}"
+                        data-field="title"
+                        data-testid="meta-edit-title"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">地点描述</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.location)}"
+                        data-index="${index}"
+                        data-field="location"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">摄影者</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.photographer)}"
+                        data-index="${index}"
+                        data-field="photographer"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">标签（逗号分隔）</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.tags.join(', '))}"
+                        data-index="${index}"
+                        data-field="tags"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">拍摄时间</span>
+                      <input
+                        type="datetime-local"
+                        value="${toDatetimeLocalValue(item.meta.capturedAt)}"
+                        data-index="${index}"
+                        data-field="capturedAt"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">设备型号</span>
+                      <input
+                        type="text"
+                        value="${escapeHtml(item.meta.cameraModel ?? '')}"
+                        data-index="${index}"
+                        data-field="cameraModel"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">纬度</span>
+                      <input
+                        type="number"
+                        step="0.000001"
+                        value="${item.meta.lat ?? ''}"
+                        data-index="${index}"
+                        data-field="lat"
+                        class="edit-input"
+                      />
+                    </label>
+                    <label class="edit-field">
+                      <span class="edit-label">经度</span>
+                      <input
+                        type="number"
+                        step="0.000001"
+                        value="${item.meta.lng ?? ''}"
+                        data-index="${index}"
+                        data-field="lng"
+                        class="edit-input"
+                      />
+                    </label>
                   </div>
 
                   <div class="mt-4 flex flex-wrap items-center gap-3">
@@ -523,10 +625,55 @@ import Navbar from '../components/Navbar.astro';
       renderQueue();
     });
 
+    queueEl?.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      if (!target || !target.dataset.field) return;
+      const index = Number(target.dataset.index);
+      if (Number.isNaN(index) || !mediaQueue[index]) return;
+      const item = mediaQueue[index];
+      const field = target.dataset.field;
+      const value = target.value;
+
+      if (field === 'title') item.title = value.trim();
+      if (field === 'location') item.location = value.trim();
+      if (field === 'photographer') item.photographer = value.trim();
+      if (field === 'tags') item.tags = value.split(',').map((tag) => tag.trim()).filter(Boolean);
+      if (field === 'cameraModel') item.meta.cameraModel = value.trim() || null;
+      if (field === 'capturedAt') {
+        if (!value) {
+          item.meta.capturedAt = null;
+        } else {
+          const parsedDate = new Date(value);
+          item.meta.capturedAt = Number.isNaN(parsedDate.getTime()) ? null : parsedDate.toISOString();
+        }
+      }
+
+      if (field === 'lat') {
+        if (value.trim() === '') {
+          item.meta.lat = null;
+        } else {
+          const lat = Number(value);
+          item.meta.lat = Number.isFinite(lat) ? lat : null;
+        }
+      }
+      if (field === 'lng') {
+        if (value.trim() === '') {
+          item.meta.lng = null;
+        } else {
+          const lng = Number(value);
+          item.meta.lng = Number.isFinite(lng) ? lng : null;
+        }
+      }
+    });
+
     saveBtn?.addEventListener('click', () => {
       const snapshot = mediaQueue.map((item) => ({
         id: item.id,
         name: item.name,
+        title: item.title,
+        location: item.location,
+        photographer: item.photographer,
+        tags: item.tags,
         mediaType: item.mediaType,
         mimeType: item.mimeType,
         size: item.size,
@@ -546,13 +693,13 @@ import Navbar from '../components/Navbar.astro';
       const discoveryPayload = mediaQueue.map((item, index) => ({
         id: item.id,
         mediaType: item.mediaType,
-        title: item.name.replace(/\.[^/.]+$/, ''),
-        location: item.meta.lat != null && item.meta.lng != null ? `${item.meta.lat}, ${item.meta.lng}` : '待补充位置',
+        title: item.title || item.name.replace(/\.[^/.]+$/, ''),
+        location: item.location || (item.meta.lat != null && item.meta.lng != null ? `${item.meta.lat}, ${item.meta.lng}` : '待补充位置'),
         url: item.previewUrl,
         thumbnail: item.previewUrl,
-        photographer: '上传者',
+        photographer: item.photographer || '上传者',
         category: item.mediaType === 'video' ? '视频' : '上传',
-        tags: [item.mediaType === 'video' ? '视频' : '照片', '上传'],
+        tags: item.tags.length > 0 ? item.tags : [item.mediaType === 'video' ? '视频' : '照片', '上传'],
         meta: item.meta,
         order: index,
       }));
@@ -589,6 +736,33 @@ import Navbar from '../components/Navbar.astro';
       line-height: 1.3;
       color: rgba(255, 255, 255, 0.92);
       word-break: break-word;
+    }
+
+    .edit-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .edit-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .edit-input {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.04);
+      color: rgba(255, 255, 255, 0.9);
+      padding: 0.48rem 0.65rem;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 180ms ease;
+    }
+
+    .edit-input:focus {
+      border-color: rgba(59, 130, 246, 0.85);
     }
   </style>
 </Layout>

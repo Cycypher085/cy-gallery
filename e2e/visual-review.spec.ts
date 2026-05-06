@@ -141,7 +141,7 @@ test.describe('Global Frame - 自动化测试', () => {
     await expect(page.getByTestId('map-link-disabled').first()).toBeVisible();
   });
 
-  test('上传页 - 同步到探索页并可在查看器看到信息区', async ({ page }) => {
+  test('上传页 - 编辑元数据后同步到探索页并可在查看器看到信息区', async ({ page }) => {
     await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
 
     const jpgBuffer = Buffer.from([
@@ -156,6 +156,10 @@ test.describe('Global Frame - 自动化测试', () => {
       buffer: jpgBuffer,
     });
 
+    await page.locator('[data-testid="meta-edit-title"]').first().fill('第三轮测试标题');
+    await page.locator('input[data-field="location"]').first().fill('上海 · 外滩');
+    await page.locator('input[data-field="tags"]').first().fill('第三轮, 上传测试');
+
     const syncBtn = page.getByTestId('sync-discovery-btn');
     await expect(syncBtn).toBeEnabled({ timeout: 5000 });
     await syncBtn.click();
@@ -163,6 +167,8 @@ test.describe('Global Frame - 自动化测试', () => {
 
     await page.goto(`${BASE_URL}/discovery`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     await expect(page.locator('[data-testid="gallery-card"]').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="gallery-card"]').first()).toContainText('第三轮测试标题');
+    await expect(page.locator('[data-testid="gallery-card"]').first()).toContainText('上海 · 外滩');
     await page.locator('.open-viewer-btn').first().click();
 
     await expect(page.getByTestId('viewer-params')).toBeVisible({ timeout: 5000 });
