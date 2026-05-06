@@ -29,6 +29,18 @@
 - 测试结果：`npm run build` Pass；`npm run preview` + `npm run test:e2e` 12 tests Pass。
 - 后续注意事项：若未来增减笔记数量或启用 draft，需同步调整 `article.note-card` 的 `toHaveCount` 或改为 `>=` 断言。
 
+### [2026-05-06] 部署稳定性修复 + 第三轮上传元数据编辑
+- 背景：Cloudflare 构建报错 `Missing entry-point to Worker script or to assets directory`，并需在第三轮继续开发上传模块。
+- 主要改动：
+  - 新增 `wrangler.jsonc`，声明 `assets.directory=./dist` 与 `build.command="npm run build"`，兼容现有 `npx wrangler versions upload`。
+  - `upload.astro` 增加元数据可编辑字段（标题/地点/摄影者/标签/时间/机型/经纬度），并将编辑结果同步到探索页预览数据。
+  - `discovery.astro` 增加本地上传媒体注入与动态渲染逻辑，支持新增分类按钮与 viewer 数据同步。
+  - `playwright.config.ts` 改为 `screenshot: 'on'`；新增 `scripts/list-playwright-screenshots.mjs` 与 `test:e2e:with-screenshots`。
+  - `visual-review.spec.ts` 增加“编辑后同步到探索页并在查看器验证”的回归用例。
+- 为什么这样实现：先修复部署入口问题，确保每次 main 构建可执行；第三轮在纯前端层完成“可编辑元数据 -> 探索页展示”闭环，不阻塞后端。
+- 测试结果：`npm run build` Pass；`npx wrangler versions upload --dry-run` Pass；`PREVIEW_URL=http://127.0.0.1:4322 npm run test:e2e:with-screenshots` 15/15 Pass。
+- 后续注意事项：若 Cloudflare 控制台后续修改 deploy command，仍建议保留 `wrangler.jsonc` 作为单一配置源；截图产物默认在 `test-results/**/test-finished-1.png`。
+
 ### [2026-05-05] 第二轮开发：上传元数据闭环 + Viewer 信息分区
 - 背景：第二轮需要贴近原始目标，做到上传后可展示参数、设备、地理位置，并在探索页与查看器可见。
 - 主要改动：`upload.astro` 新增媒体队列工作台（图片/视频、大小校验、EXIF 解析、参数卡片、位置兜底、同步到探索页）；`src/lib/media.ts` 抽取统一媒体模型并补充视频样例；`discovery.astro` 增加本地同步媒体注入与动态卡片渲染；`PhotoViewer.astro` 扩展为参数/设备/位置三分区并支持视频播放；`visual-review.spec.ts` 新增 3 条第二轮用例。

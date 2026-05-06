@@ -64,5 +64,7 @@
 - 初始化 tester memory 模板。
 - SQU-6 后续“个人网站第一轮开发”回归：先运行 `npm run build` 再用 `npm run preview` + `PREVIEW_URL=http://127.0.0.1:4322 npm run test:e2e`，12/12 全量通过，覆盖首页双模块入口、Notes 导航高亮、Notes 列表与详情链路。
 - 当 preview 端口冲突时 Astro 会自动升端口（如 4321 -> 4322），执行 Playwright 前必须显式设置 `PREVIEW_URL`，否则会误连旧服务导致结果不可追踪。
+- 在“部署修复 + 第三轮开发”回归中，新增 `npm run test:e2e:with-screenshots`，每条用例都会产出 `test-results/**/test-finished-1.png` 并打印路径，便于在测试交付中直接附带截图证据。
+- 全量回归调整到 15 条后，先执行 `wrangler versions upload --dry-run` 再跑 Playwright，可同时确认 Cloudflare 部署链路与页面行为无回归，降低“构建能过但功能未验”的风险。
 - 第二轮上传元数据回归中，初次失败来自探索页卡片数量断言（9 -> 10，新增视频样例导致）；修复策略是断言与静态数据源 `galleryMedia.length` 对齐后复测。
 - 第二轮新增用例需覆盖“格式拦截、元数据兜底、同步探索页并查看 viewer 三分区”，最终 `15/15` 通过，风险由 Medium 收敛到 Low。
