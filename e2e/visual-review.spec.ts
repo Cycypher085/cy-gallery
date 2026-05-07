@@ -47,21 +47,27 @@ test.describe('Global Frame - 自动化测试', () => {
 
   test('首页 - Dark mode toggle', async ({ page }) => {
     await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
-    
-    const toggleBtn = page.locator('button[aria-label="Toggle dark mode"]');
-    await expect(toggleBtn).toBeVisible({ timeout: 5000 });
+
+    const darkBtn = page.getByRole('button', { name: '切换到深色模式' });
+    const lightBtn = page.getByRole('button', { name: '切换到浅色模式' });
+    await expect(darkBtn).toBeVisible({ timeout: 5000 });
+    await expect(lightBtn).toBeVisible({ timeout: 5000 });
+
     const beforeDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
-    
-    await toggleBtn.click();
-    await page.waitForTimeout(200);
-    
+    if (beforeDark) {
+      await lightBtn.click();
+      await page.waitForTimeout(150);
+    }
+
+    await darkBtn.click();
+    await page.waitForTimeout(150);
+
     const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
-    expect(isDark).toBe(!beforeDark);
-    
-    // 刷新检查持久化
+    expect(isDark).toBe(true);
+
     await page.reload({ waitUntil: 'domcontentloaded' });
     const isDarkAfterReload = await page.evaluate(() => document.documentElement.classList.contains('dark'));
-    expect(isDarkAfterReload).toBe(isDark);
+    expect(isDarkAfterReload).toBe(true);
   });
 
   test('探索页 - Filter 功能', async ({ page }) => {
@@ -107,7 +113,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('上传页 - 加载正常', async ({ page }) => {
-    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+    await page.goto(`${BASE_URL}/upload/`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     
     await expect(page.locator('h1')).toContainText('上传', { timeout: 5000 });
     await expect(page.locator('#drop-zone')).toBeVisible({ timeout: 5000 });
@@ -115,7 +121,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('上传页 - 非支持格式给出提示', async ({ page }) => {
-    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+    await page.goto(`${BASE_URL}/upload/`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
 
     await page.setInputFiles('#file-input', {
       name: 'unsupported.txt',
@@ -130,7 +136,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('上传页 - 图片元数据队列与缺失位置兜底', async ({ page }) => {
-    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+    await page.goto(`${BASE_URL}/upload/`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
 
     const tinyPngBase64 =
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO5sVuoAAAAASUVORK5CYII=';
@@ -150,7 +156,7 @@ test.describe('Global Frame - 自动化测试', () => {
   });
 
   test('上传页 - 编辑元数据后同步到探索页并可在查看器看到信息区', async ({ page }) => {
-    await page.goto(`${BASE_URL}/upload`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
+    await page.goto(`${BASE_URL}/upload/`, { waitUntil: 'domcontentloaded', timeout: process.env.CI ? 30000 : 15000 });
     await page.evaluate(() => localStorage.removeItem('gf-discovery-media'));
 
     const jpgBuffer = Buffer.from([

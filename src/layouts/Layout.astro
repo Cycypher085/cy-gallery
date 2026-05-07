@@ -25,7 +25,23 @@ const { title, description = 'A personal photo gallery with interactive map' } =
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script is:inline>
     // Theme initialization must run before render to avoid flash.
+    // applySiteTheme is defined here so navbar/scripts can call it before body end.
     (function() {
+      function dispatchTheme(next) {
+        try {
+          window.dispatchEvent(new CustomEvent('gf-theme-change', { detail: { theme: next } }));
+        } catch (_e) {}
+      }
+      window.applySiteTheme = function (theme) {
+        var next = theme === 'dark' ? 'dark' : 'light';
+        try {
+          localStorage.setItem('theme', next);
+        } catch (_e) {}
+        document.documentElement.classList.toggle('dark', next === 'dark');
+        document.documentElement.dataset.theme = next;
+        dispatchTheme(next);
+      };
+
       const stored = localStorage.getItem('theme');
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const theme = stored === 'light' ? 'light' : (stored === 'dark' || prefersDark ? 'dark' : 'light');
@@ -34,34 +50,14 @@ const { title, description = 'A personal photo gallery with interactive map' } =
     })();
   </script>
 </head>
-<body class="site-shell font-sans transition-colors duration-300">
+<body class="site-shell font-sans transition-colors duration-500 ease-out">
   <slot />
   
   <script is:inline>
-    function applyTheme(theme) {
-      const isDark = theme === 'dark';
-      document.documentElement.classList.toggle('dark', isDark);
-      document.documentElement.dataset.theme = theme;
-      document.querySelectorAll('.dark-icon').forEach(el => {
-        el.classList.toggle('hidden', !isDark);
-      });
-      document.querySelectorAll('.light-icon').forEach(el => {
-        el.classList.toggle('hidden', isDark);
-      });
-    }
-
-    // Dark mode toggle function with system preference support
-    window.toggleDarkMode = function() {
-      const isDark = document.documentElement.classList.contains('dark');
-      const nextTheme = isDark ? 'light' : 'dark';
-      localStorage.setItem('theme', nextTheme);
-      applyTheme(nextTheme);
-    };
-
-    // Listen for system preference changes
+    // Sync body script with head-defined applySiteTheme; respect explicit user choice.
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
       if (!localStorage.getItem('theme')) {
-        applyTheme(e.matches ? 'dark' : 'light');
+        window.applySiteTheme(e.matches ? 'dark' : 'light');
       }
     });
   </script>

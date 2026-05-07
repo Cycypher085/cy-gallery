@@ -53,15 +53,33 @@ function isNavActive(href: string): boolean {
         <span class="material-symbols-outlined text-xl">search</span>
       </button>
       
-      <!-- Theme Toggle -->
-      <button 
-        class="p-2 hover:bg-white/10 dark:hover:bg-white/10 rounded-full transition-colors"
-        onclick="toggleDarkMode()"
-        aria-label="Toggle dark mode"
+      <!-- Theme: explicit light / dark (separate targets) -->
+      <div
+        class="flex items-center gap-0.5 rounded-full border border-default bg-black/[0.03] p-0.5 dark:bg-white/[0.06]"
+        role="group"
+        aria-label="颜色主题"
       >
-        <span class="material-symbols-outlined dark-icon text-xl hidden">dark_mode</span>
-        <span class="material-symbols-outlined light-icon text-xl">light_mode</span>
-      </button>
+        <button
+          type="button"
+          id="theme-btn-light"
+          class="theme-segment rounded-full p-2 transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
+          aria-label="切换到浅色模式"
+          aria-pressed="false"
+          data-theme-choice="light"
+        >
+          <span class="material-symbols-outlined text-xl leading-none">light_mode</span>
+        </button>
+        <button
+          type="button"
+          id="theme-btn-dark"
+          class="theme-segment rounded-full p-2 transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/10"
+          aria-label="切换到深色模式"
+          aria-pressed="false"
+          data-theme-choice="dark"
+        >
+          <span class="material-symbols-outlined text-xl leading-none">dark_mode</span>
+        </button>
+      </div>
 
       <!-- Upload CTA (Desktop) -->
       <a href="/upload" class="hidden md:inline-flex">
@@ -116,67 +134,99 @@ function isNavActive(href: string): boolean {
 
 <div
   id="global-search-modal"
-  class="fixed inset-0 z-[70] hidden items-start justify-center bg-black/50 px-4 pt-20 md:pt-24"
+  class="fixed inset-0 z-[70] hidden overflow-y-auto bg-black/50 px-4 py-10 sm:py-12"
   role="dialog"
   aria-modal="true"
   aria-labelledby="global-search-title"
 >
-  <div class="w-full max-w-2xl rounded-3xl border border-default bg-surface p-5 shadow-2xl md:p-6">
-    <div class="flex items-center justify-between gap-3">
-      <div>
+  <div
+    class="my-auto w-full max-w-2xl min-w-0 shrink-0 rounded-3xl border border-default bg-surface p-5 shadow-2xl md:p-6"
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div class="min-w-0 flex-1">
         <p id="global-search-title" class="text-base font-semibold">全局搜索</p>
-        <p class="text-xs text-secondary">输入关键词并回车，快速跳转到笔记列表检索。</p>
+        <p class="mt-1 text-xs leading-relaxed text-secondary">
+          输入关键词并回车，快速跳转到笔记列表检索。
+        </p>
       </div>
       <button
         id="close-search-btn"
-        class="rounded-full p-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-        aria-label="Close search"
+        class="shrink-0 rounded-full p-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+        aria-label="关闭搜索"
       >
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
 
-    <form id="global-search-form" class="mt-4 flex gap-2">
+    <form id="global-search-form" class="mt-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-stretch">
       <input
         id="global-search-input"
-        class="w-full rounded-2xl border border-default bg-transparent px-4 py-3 text-sm outline-none transition focus:border-blue-400"
+        class="min-h-[44px] min-w-0 flex-1 rounded-2xl border border-default bg-transparent px-4 py-3 text-sm outline-none transition focus:border-blue-400"
         type="search"
         placeholder="例如：构图 / 镜头 / 日常"
         autocomplete="off"
       />
-      <button class="rounded-2xl bg-blue-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-600" type="submit">
+      <button
+        class="min-h-[44px] shrink-0 rounded-2xl bg-blue-500 px-6 py-3 text-sm font-medium text-white transition hover:bg-blue-600 sm:px-8"
+        type="submit"
+      >
         搜索
       </button>
     </form>
 
-    <div class="mt-4 grid gap-2 sm:grid-cols-3">
-      <a class="rounded-2xl border border-default px-4 py-3 text-sm transition hover:border-blue-400 hover:text-blue-500" href="/discovery">前往探索页</a>
-      <a class="rounded-2xl border border-default px-4 py-3 text-sm transition hover:border-blue-400 hover:text-blue-500" href="/upload">前往上传页</a>
-      <a class="rounded-2xl border border-default px-4 py-3 text-sm transition hover:border-blue-400 hover:text-blue-500" href="/notes">前往笔记页</a>
+    <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <a
+        class="block rounded-2xl border border-default px-4 py-3 text-center text-sm transition hover:border-blue-400 hover:text-blue-500"
+        href="/discovery"
+        >前往探索页</a
+      >
+      <a
+        class="block rounded-2xl border border-default px-4 py-3 text-center text-sm transition hover:border-blue-400 hover:text-blue-500"
+        href="/upload"
+        >前往上传页</a
+      >
+      <a
+        class="block rounded-2xl border border-default px-4 py-3 text-center text-sm transition hover:border-blue-400 hover:text-blue-500"
+        href="/notes"
+        >前往笔记页</a
+      >
     </div>
   </div>
 </div>
 
 <script is:inline>
-  // Theme icon update
-  function updateThemeIcons() {
+  function syncThemeSegments() {
     const isDark = document.documentElement.classList.contains('dark');
-    document.querySelectorAll('.dark-icon').forEach(el => {
-      el.classList.toggle('hidden', !isDark);
-    });
-    document.querySelectorAll('.light-icon').forEach(el => {
-      el.classList.toggle('hidden', isDark);
-    });
+    const lightBtn = document.getElementById('theme-btn-light');
+    const darkBtn = document.getElementById('theme-btn-dark');
+    if (lightBtn) {
+      lightBtn.setAttribute('aria-pressed', (!isDark).toString());
+      lightBtn.classList.toggle('bg-blue-500/20', !isDark);
+      lightBtn.classList.toggle('text-blue-600', !isDark);
+      lightBtn.classList.toggle('dark:text-blue-400', !isDark);
+    }
+    if (darkBtn) {
+      darkBtn.setAttribute('aria-pressed', isDark.toString());
+      darkBtn.classList.toggle('bg-blue-500/20', isDark);
+      darkBtn.classList.toggle('text-blue-600', isDark);
+      darkBtn.classList.toggle('dark:text-blue-400', isDark);
+    }
   }
-  
-  // Initial update
-  (function() {
-    updateThemeIcons();
-  })();
-  
-  // Watch for changes
-  const observer = new MutationObserver(updateThemeIcons);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+
+  document.addEventListener('gf-theme-change', syncThemeSegments);
+  document.addEventListener('DOMContentLoaded', syncThemeSegments);
+  const themeObserver = new MutationObserver(syncThemeSegments);
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('theme-btn-light')?.addEventListener('click', function () {
+      window.applySiteTheme && window.applySiteTheme('light');
+    });
+    document.getElementById('theme-btn-dark')?.addEventListener('click', function () {
+      window.applySiteTheme && window.applySiteTheme('dark');
+    });
+    syncThemeSegments();
+  });
 
   // Mobile menu toggle
   window.toggleMobileMenu = function() {
@@ -204,13 +254,13 @@ function isNavActive(href: string): boolean {
 
     const openModal = () => {
       modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      modal.classList.add('flex', 'flex-col', 'items-center');
       document.body.style.overflow = 'hidden';
-      input.focus();
+      requestAnimationFrame(() => input.focus());
     };
 
     const closeModal = () => {
-      modal.classList.remove('flex');
+      modal.classList.remove('flex', 'flex-col', 'items-center');
       modal.classList.add('hidden');
       document.body.style.overflow = '';
     };

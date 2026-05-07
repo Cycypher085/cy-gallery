@@ -22,6 +22,13 @@
 - 测试结果：
 - 后续注意事项：
 
+### [2026-05-07] 首页/探索排版、主题双按钮、洱海图链、地图与全局搜索修复
+- 背景：首页与探索页出现竖排文字/窄列换行；洱海晨曦外链 404；主题切换为单按钮；全局搜索弹层窄屏挤压；探索地图观感简陋。
+- 主要改动：`Layout.astro` 在 head 暴露 `applySiteTheme` 并派发 `gf-theme-change`；`Navbar.astro` 拆分为太阳/月亮独立按钮并重排全局搜索弹层（纵向表单 + min-w-0）；`global.css` 强化站点背景层次与主题过渡；`index.astro`/`discovery.astro` 增加 min-w-0、text-pretty、卡片元信息换行；`media.ts` 与首页精选替换可访问的洱海配图 URL；探索地图改为 Voyager（浅色）+ fitBounds + 主题切换时换底图；E2E 主题用例与 `/upload/` 路径。
+- 为什么这样实现：竖排文字主要由 flex 子项默认 min-width:auto 与窄屏表单共同导致，用 min-w-0 与 responsive flex 根治；双按钮符合心智模型并与 localStorage 持久化一致。
+- 测试结果：`npm run build` Pass；`npx playwright test e2e/visual-review.spec.ts` 16/16 Pass（preview 需先行启动）。
+- 后续注意事项：静态预览偶发 `/upload` 无斜杠 404，E2E 已统一为 `/upload/`。
+
 ### [2026-05-05] 首页双模块入口 + Notes 导航 + 笔记内容与 E2E
 - 背景：个人站点第一轮静态交付，画廊与笔记双入口、导航与回归覆盖。
 - 主要改动：`index.astro` 增加 `id="workflow-test"` 的双卡片区块（discovery / notes）；`Navbar` 增加「笔记」并用前缀匹配实现 `/notes` 与 `/notes/[slug]` 高亮；`src/content/notes` 新增 3 篇 markdown；`visual-review.spec.ts` 扩展首页与笔记流断言。

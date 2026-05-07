@@ -17,9 +17,9 @@ const categoriesJson = JSON.stringify(categories);
   <main class="pt-28 pb-24 px-6 min-h-screen bg-secondary text-primary">
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
-      <div class="text-center mb-12">
-        <h1 class="text-4xl font-display font-bold text-primary mb-4">发现精彩作品</h1>
-        <p class="text-secondary max-w-2xl mx-auto">
+      <div class="mb-12 text-center">
+        <h1 class="mb-4 text-4xl font-display font-bold text-primary">发现精彩作品</h1>
+        <p class="mx-auto max-w-2xl min-w-0 px-1 text-base leading-relaxed text-secondary text-pretty sm:px-0">
           探索全球摄影师的精彩作品，每一张照片都有一个故事
         </p>
       </div>
@@ -107,19 +107,19 @@ const categoriesJson = JSON.stringify(categories);
                 </div>
               </div>
               <div class="p-5">
-                <h3 class="text-primary font-medium text-lg mb-2">{photo.title}</h3>
-                <div class="flex items-center justify-between">
-                  <p class="text-secondary text-sm flex items-center gap-1">
+                <h3 class="mb-3 text-lg font-medium text-primary">{photo.title}</h3>
+                <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                  <p class="flex items-center gap-1 text-sm text-secondary">
                     <span class="material-symbols-outlined text-sm">person</span>
                     {photo.photographer}
                   </p>
-                  <p class="text-secondary text-sm flex items-center gap-1">
+                  <p class="flex items-center gap-1 text-sm text-secondary">
                     <span class="material-symbols-outlined text-sm">calendar_today</span>
                     {photo.meta.capturedAt ? new Date(photo.meta.capturedAt).toLocaleDateString('zh-CN') : '--'}
                   </p>
-                  <div class="flex gap-1">
+                  <div class="flex flex-wrap gap-1">
                     {photo.tags.slice(0, 2).map(tag => (
-                      <span class="text-xs px-2 py-0.5 rounded-full chip-neutral">{tag}</span>
+                      <span class="rounded-full px-2 py-0.5 text-xs chip-neutral">{tag}</span>
                     ))}
                   </div>
                 </div>
@@ -163,8 +163,19 @@ const categoriesJson = JSON.stringify(categories);
       
       <!-- Map View (Hidden by default) -->
       <div id="view-map" class="view-content hidden">
-        <div id="discovery-map" class="h-[600px] rounded-2xl overflow-hidden border border-default"></div>
-        <p class="text-center text-muted mt-4 text-sm">点击地图上的标记查看照片</p>
+        <div
+          class="relative overflow-hidden rounded-2xl border border-default bg-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-black/[0.04] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] dark:ring-white/[0.06]"
+        >
+          <div
+            class="pointer-events-none absolute inset-x-0 top-0 z-[400] h-16 bg-gradient-to-b from-[color-mix(in_srgb,var(--color-bg-secondary)_88%,transparent)] to-transparent"
+            aria-hidden="true"
+          ></div>
+          <div
+            id="discovery-map"
+            class="h-[min(72vh,680px)] min-h-[440px] w-full [&_.leaflet-popup-content-wrapper]:rounded-xl [&_.leaflet-popup-content]:!m-3"
+          ></div>
+        </div>
+        <p class="mt-4 text-center text-sm text-muted">点击地图上的标记查看照片 · 双指或滚轮缩放探索地点</p>
       </div>
 
       <!-- Load More -->
@@ -286,17 +297,17 @@ const categoriesJson = JSON.stringify(categories);
               </div>
             </div>
             <div class="p-5">
-              <h3 class="text-primary font-medium text-lg mb-2">${escapeHtml(photo.title)}</h3>
-              <div class="flex items-center justify-between">
-                <p class="text-secondary text-sm flex items-center gap-1">
+              <h3 class="mb-3 text-lg font-medium text-primary">${escapeHtml(photo.title)}</h3>
+              <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <p class="flex items-center gap-1 text-sm text-secondary">
                   <span class="material-symbols-outlined text-sm">person</span>
                   ${escapeHtml(photo.photographer)}
                 </p>
-                <p class="text-secondary text-sm flex items-center gap-1">
+                <p class="flex items-center gap-1 text-sm text-secondary">
                   <span class="material-symbols-outlined text-sm">calendar_today</span>
                   ${dateLabel}
                 </p>
-                <div class="flex gap-1">${tags}</div>
+                <div class="flex flex-wrap gap-1">${tags}</div>
               </div>
               <div class="mt-2 text-xs text-muted flex items-center gap-1">
                 <span class="material-symbols-outlined text-sm">photo_camera</span>
@@ -403,6 +414,30 @@ const categoriesJson = JSON.stringify(categories);
 
   let mapInitialized = false;
   let map = null;
+  let tileLayerRef = null;
+
+  function discoveryTileTemplate(isDark) {
+    return isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+  }
+
+  function refreshDiscoveryMapTiles() {
+    const leaflet = window.L;
+    if (!map || !tileLayerRef || !leaflet) return;
+    const isDark = document.documentElement.classList.contains('dark');
+    map.removeLayer(tileLayerRef);
+    tileLayerRef = leaflet
+      .tileLayer(discoveryTileTemplate(isDark), {
+        subdomains: 'abcd',
+        maxZoom: 19,
+      })
+      .addTo(map);
+    tileLayerRef.bringToBack();
+  }
+
+  document.addEventListener('gf-theme-change', refreshDiscoveryMapTiles);
+
   function initMap() {
     if (mapInitialized && map) {
       map.invalidateSize();
@@ -419,30 +454,35 @@ const categoriesJson = JSON.stringify(categories);
 
     const isDark = document.documentElement.classList.contains('dark');
     map = leaflet.map('discovery-map', {
-      center: [20, 0],
+      center: [25, 15],
       zoom: 2,
+      minZoom: 2,
+      worldCopyJump: true,
       attributionControl: false,
+      zoomControl: true,
     });
 
-    const tileUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    leaflet.tileLayer(tileUrl, {
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map);
+    tileLayerRef = leaflet
+      .tileLayer(discoveryTileTemplate(isDark), {
+        subdomains: 'abcd',
+        maxZoom: 19,
+      })
+      .addTo(map);
 
+    const latLngs = [];
     photos.forEach((photo, index) => {
       const lat = Number(photo.meta?.lat);
       const lng = Number(photo.meta?.lng);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+      latLngs.push([lat, lng]);
       const marker = leaflet.marker([lat, lng]).addTo(map);
       const popupContent = `
         <div style="min-width: 200px;">
           <img src="${escapeHtml(photo.thumbnail || photo.url)}" alt="${escapeHtml(photo.title)}" style="width: 100%; border-radius: 8px; margin-bottom: 8px;" />
-          <h3 style="color: #333; font-weight: 600; margin-bottom: 4px;">${escapeHtml(photo.title)}</h3>
-          <p style="color: #666; font-size: 12px;">${escapeHtml(photo.location)}</p>
+          <h3 style="font-weight: 600; margin-bottom: 4px; color: var(--color-text-primary);">${escapeHtml(photo.title)}</h3>
+          <p style="font-size: 12px; color: var(--color-text-secondary);">${escapeHtml(photo.location)}</p>
           <button
+            type="button"
             onclick="window.openPhotoViewer && window.openPhotoViewer(${index})"
             style="margin-top: 8px; width: 100%; padding: 8px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer;"
           >
@@ -452,6 +492,14 @@ const categoriesJson = JSON.stringify(categories);
       `;
       marker.bindPopup(popupContent);
     });
+
+    if (latLngs.length > 0) {
+      try {
+        map.fitBounds(latLngs, { padding: [56, 56], maxZoom: 5 });
+      } catch (_e) {
+        map.setView(latLngs[0], 4);
+      }
+    }
 
     mapInitialized = true;
   }
