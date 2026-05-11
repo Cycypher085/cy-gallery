@@ -60,3 +60,14 @@ is_background: false
 
 - 长期经验写入 `docs/agent-memory/coder-memory.md`。
 - 实现必须遵循 `.cursor/rules` 中团队规则。
+
+## 单 Issue 自动流转信号（必须输出）
+
+每次完成一轮后，在回复末尾追加一行 machine-readable 信号（严格单行）：
+
+- 需要交给 tester 时：
+  `FLOW_SIGNAL: NEXT=TEST STATUS=READY_FOR_TEST RETRY=0`
+- 因需求不清需回退 planner 时：
+  `FLOW_SIGNAL: NEXT=PLAN STATUS=NEEDS_REPLAN RETRY=0`
+
+若本轮有失败并进入修复重试，`RETRY` 递增（1,2,3...）。
